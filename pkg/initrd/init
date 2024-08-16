@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# Simple init script for the initrd.
+#
+# Supports the following kernel command line options:
+#
+#   root=PATH - The root device to mount.
+#
+#   init=PATH - The init binary to run. Defaults to /sbin/init.
+#
+#   single - Drop to a shell before running init.
+
+set -e
+
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mount -t proc proc /proc
+mkdir /dev/pts
+mount -t devpts devpts /dev/pts
+
+set -- $(cat /proc/cmdline)
+
+ROOT=
+SINGLE=
+INIT=/sbin/init
+
+for opt; do
+    case "$opt" in
+    root=*)
+        ROOT="${opt#*=}"
+        ;;
+    init=*)
+        INIT="${opt#*=}"
+        ;;
+    single)
+        SINGLE=1
+        ;;
+    esac
+done
+
+if [ -n "$SINGLE" ]; then
+    echo "Entering single mode. Type 'exit' to continue booting."
+    sh || true
+fi
+
+if [ -z "$ROOT" ]; then
+    echo "No root device specified. Dropping to a shell."
+    exec sh
+fi
+
+if [ ! -f "$ROOT" ]; then
+    echo "Root device '$ROOT' does not exist. Dropping to a shell."
+    sh
+fi
+
+mkdir -p /newroot
+mount "$ROOT" /newroot
+
+if [ -x "/newroot/$INIT" ]; then
+    echo "Could not find init. Dropping to a shell."
+    sh
+fi
+
+exec switch_root /newroot "$INIT"

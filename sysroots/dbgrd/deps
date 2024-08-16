@@ -1,0 +1,7 @@
+# Full environment for debugging.
+pkg/busybox
+gdb
+strace
+htop
+pciutils
+ethtool

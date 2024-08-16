@@ -1,0 +1,11 @@
+[binaries]
+strip = 'aarch64-linux-musl-strip'
+ar = 'aarch64-linux-musl-ar'
+cc = 'aarch64-linux-musl-gcc'
+cpp = 'aarch64-linux-musl-g++'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'aarch64'
+cpu = 'aarch64'
+endian = 'little'

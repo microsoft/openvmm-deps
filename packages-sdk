@@ -1,0 +1,11 @@
+# The SDK for building openvmm-deps
+
+# Disable FPO to get better debug output.
+CFLAGS=-fno-omit-frame-pointer -Os
+CXXFLAGS=-fno-omit-frame-pointer -Os
+
+musl-dev
+libgcc
+openssl-dev
+openssl-libs-static
+pkg/sysroot-tools

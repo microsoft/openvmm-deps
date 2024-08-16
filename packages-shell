@@ -1,0 +1,2 @@
+# Minimal shell environment for runtime debugging.
+busybox # TODO: consider busybox-static, which would require some post-processing to set up

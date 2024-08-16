@@ -1,0 +1,12 @@
+# The SDK for building openvmm
+
+# Security-related flags.
+CFLAGS=-fstack-protector-strong -D_FORTIFY_SOURCE=2 -z noexecstack -fpic -Wl,-z,relro -Wl,-z,now -Wformat -Wformat-security -Werror=format-security -fstack-clash-protection
+CXXFLAGS=$CFLAGS
+
+# Disable FPO to get better debug output.
+CFLAGS=$CFLAGS -fno-omit-frame-pointer -Os
+CXXFLAGS=$CXXFLAGS -fno-omit-frame-pointer -Os
+
+pkg/libunwind
+pkg/openssl3

@@ -1,0 +1,8 @@
+# Full environment for debugging.
+busybox
+gdb
+strace
+htop
+pciutils
+ethtool
+perf

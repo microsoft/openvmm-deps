@@ -1,0 +1,70 @@
+trigger:
+- main
+
+parameters:
+- name: platforms
+  type: object
+  default:
+    - architecture: aarch64
+    - architecture: x86_64
+
+jobs:
+
+  - ${{ each platform in parameters.platforms }}:
+
+    - job: ${{ platform.architecture }}
+      pool:
+        name: HvLite-CI-Linux-Pool-WestUS2
+        vmImage: MMSUbuntu20.04-1TB-2
+        demands:
+            - ImageOverride -equals MMSUbuntu20.04-1TB-2
+      timeoutInMinutes: 480
+      steps:
+      - checkout: self
+        submodules: true
+        fetchDepth: 1
+
+      - bash: sudo apt-get install qemu-user-static -y
+        displayName: Install instruction emulators
+        condition: and(succeeded(), eq('${{ platform.architecture }}', 'aarch64'))
+
+      - bash: docker build --platform "${{ platform.architecture }}" --output type=local,dest=out .
+        displayName: Build ${{ platform.architecture }} outputs
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish output'
+        inputs:
+          targetPath: out
+          artifact: ${{ platform.architecture }}
+          publishLocation: pipeline
+
+  - job: package
+    pool: HvLite-CI-Linux-Pool-WestUS2
+    dependsOn: [aarch64, x86_64]
+    steps:
+      - checkout: self
+
+      - task: DownloadPipelineArtifact@2
+        displayName: Download binaries
+        inputs:
+          path: out
+
+      - bash: cd out && mkdir package && tar cvjf "package/openvmm-deps.0.1.0-$(build.BuildNumber)".tar.bz2 x86_64 aarch64
+        displayName: 'Build package'
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish package'
+        inputs:
+          targetPath: out/package
+          artifact: package
+          publishLocation: pipeline
+
+      - powershell: |
+                pip install click requests
+                python pkg/Tools/create-release.py "$env:version" "out/package/openvmm-deps.$env:version.tar.bz2" --github-token "$env:token"
+
+        displayName: Create Github release
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+        env:
+          token: $(GITHUB_RELEASE_TOKEN)
+          version: "0.1.0-$(build.BuildNumber)"

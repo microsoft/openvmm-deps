@@ -1,0 +1,16 @@
+[submodule "cross/musl-cross-make"]
+	path = cross/musl-cross-make
+	url = https://github.com/richfelker/musl-cross-make
+[submodule "src/llvm-project"]
+	path = src/llvm-project
+	url = https://github.com/llvm/llvm-project.git
+	branch = release/17.x
+	shallow = true
+[submodule "src/linux"]
+	path = src/linux
+	url = https://github.com/gregkh/linux
+	branch = linux-6.1.y
+	shallow = true
+[submodule "src/openssl3"]
+	path = src/openssl3
+	url = https://github.com/openssl/openssl

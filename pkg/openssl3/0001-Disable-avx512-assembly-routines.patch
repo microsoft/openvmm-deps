@@ -1,0 +1,25 @@
+From 092c51e4618d12dcbf599112285ee589059be527 Mon Sep 17 00:00:00 2001
+From: John Starks <jostarks@microsoft.com>
+Date: Wed, 9 Aug 2023 14:48:37 -0700
+Subject: [PATCH] Disable avx512 assembly routines
+
+---
+ crypto/modes/asm/aes-gcm-avx512.pl | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/crypto/modes/asm/aes-gcm-avx512.pl b/crypto/modes/asm/aes-gcm-avx512.pl
+index 9d83abf4da..a4a3c0be6b 100644
+--- a/crypto/modes/asm/aes-gcm-avx512.pl
++++ b/crypto/modes/asm/aes-gcm-avx512.pl
+@@ -72,6 +72,9 @@ if (!$avx512vaes && `$ENV{CC} -v 2>&1`
+     }
+ }
+
++# Disable AVX-512 to save binary size.
++$avx512vaes = 0;
++
+ open OUT, "| \"$^X\" \"$xlate\" $flavour \"$output\""
+   or die "can't call $xlate: $!";
+ *STDOUT = *OUT;
+--
+2.34.1
