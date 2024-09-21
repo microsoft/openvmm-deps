@@ -49,7 +49,7 @@ jobs:
         inputs:
           path: out
 
-      - bash: cd out && mkdir package && tar cvjf "package/openvmm-deps.x86_64.0.1.0-$(build.BuildNumber)".tar.bz2 -C x86_64 . && tar cvjf "package/openvmm-eps.aarch64.0.1.0-$(build.BuildNumber)".tar.bz2 -C aarch64 .
+      - bash: cd out && mkdir package && tar cvjf "package/openvmm-deps.x86_64.0.1.0-$(build.BuildNumber)".tar.bz2 -C x86_64 . && tar cvjf "package/openvmm-deps.aarch64.0.1.0-$(build.BuildNumber)".tar.bz2 -C aarch64 .
         displayName: 'Build package'
 
       - task: PublishPipelineArtifact@1
