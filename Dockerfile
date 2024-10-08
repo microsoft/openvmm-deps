@@ -23,7 +23,7 @@ ENV TARGETARCH=$TARGETARCH
 RUN --network=none /cross/build.sh
 
 # Build the image for installing Mariner packages.
-FROM $TARGET_IMAGE as target-builder
+FROM $TARGET_IMAGE AS target-builder
 ARG TARGETARCH
 ENV TARGETARCH=$TARGETARCH
 ENV BUILD_BASE=1
@@ -31,7 +31,7 @@ COPY --link pkg /pkg
 COPY --link sysroots /sysroots
 
 # Build the image for compiling packages from source.
-FROM --platform=$BUILDPLATFORM $HOST_IMAGE as package-builder
+FROM --platform=$BUILDPLATFORM $HOST_IMAGE AS package-builder
 COPY pkg/Tools/deps.sh /pkg/Tools/
 RUN /pkg/Tools/deps.sh
 COPY --link src /src
@@ -44,58 +44,58 @@ ENV TARGETARCH=$TARGETARCH
 COPY --from=cross-builder --link /opt/cross /opt/cross
 
 # Build base image for dbgrd.
-FROM target-builder as base-dbgrd
+FROM target-builder AS base-dbgrd
 RUN /pkg/Tools/build.sh sysroots/dbgrd
 # Build dbgrd.
-FROM --platform=$BUILDPLATFORM package-builder as build-dbgrd
+FROM --platform=$BUILDPLATFORM package-builder AS build-dbgrd
 COPY --from=base-dbgrd --link /sysroot /sysroot
 RUN BUILD_CPIO=1 /pkg/Tools/build.sh sysroots/dbgrd
-FROM scratch as result-dbgrd
+FROM scratch AS result-dbgrd
 COPY --from=build-dbgrd --link /out/sysroot.cpio.gz /dbgrd.cpio.gz
 
 # Build base image for shell.
-FROM target-builder as base-shell
+FROM target-builder AS base-shell
 RUN /pkg/Tools/build.sh sysroots/shell
 # Build shell.
-FROM --platform=$BUILDPLATFORM package-builder as build-shell
+FROM --platform=$BUILDPLATFORM package-builder AS build-shell
 COPY --from=base-shell --link /sysroot /sysroot
 RUN BUILD_CPIO=1 /pkg/Tools/build.sh sysroots/shell
-FROM scratch as result-shell
+FROM scratch AS result-shell
 COPY --from=build-shell --link /out/sysroot.cpio.gz /shell.cpio.gz
 
 # Build the sdk.
 #
 # Note that this pulls from the cross compiler and doesn't use the target
 # builder.
-FROM --platform=$BUILDPLATFORM package-builder as build-sdk
+FROM --platform=$BUILDPLATFORM package-builder AS build-sdk
 RUN ln -s /opt/cross/*-linux-musl /sysroot
 RUN /pkg/Tools/build.sh sysroots/sdk
-FROM scratch as result-sdk
+FROM scratch AS result-sdk
 COPY --from=build-sdk --link /out/sysroot.tar.gz /sysroot.tar.gz
 
 # Build base image for initrd.
-FROM target-builder as base-initrd
+FROM target-builder AS base-initrd
 RUN /pkg/Tools/build.sh sysroots/initrd
 # Build the Linux initrd.
-FROM --platform=$BUILDPLATFORM package-builder as build-initrd
+FROM --platform=$BUILDPLATFORM package-builder AS build-initrd
 COPY --from=base-initrd --link /sysroot /sysroot
 RUN BUILD_CPIO=1 /pkg/Tools/build.sh sysroots/initrd
-FROM scratch as result-initrd
+FROM scratch AS result-initrd
 COPY --from=build-initrd --link /out/sysroot.cpio.gz /initrd
 
 # Build the Linux test package.
-FROM --platform=$BUILDPLATFORM package-builder as build-linux
+FROM --platform=$BUILDPLATFORM package-builder AS build-linux
 RUN /pkg/Tools/build.sh sysroots/linux
-FROM scratch as result-linux
+FROM scratch AS result-linux
 COPY --from=build-linux --link /sysroot/boot /
 COPY --from=result-initrd --link / /
 
-FROM --platform=$BUILDPLATFORM package-builder as result-libunwind
+FROM --platform=$BUILDPLATFORM package-builder AS result-libunwind
 RUN /pkg/Tools/build.sh pkg/libunwind
 RUN find /sysroot
 
 # Build the output.
-FROM scratch as output
+FROM scratch AS output
 COPY --from=result-dbgrd --link / /
 COPY --from=result-shell --link / /
 COPY --from=result-sdk --link / /
