@@ -9,7 +9,7 @@ COPY /cross/deps.sh /cross/
 RUN /cross/deps.sh
 # Download sources. build.sh can do this for us, but then they won't be cached.
 # Plus, this allows us to validate a SHA256 checksum instead of just SHA1.
-ADD --checksum=sha256:ab66fc2d1c3ec0359b8e08843c9f33b63e8707efdff5e4cc5c200eae24722cbf --link https://ftpmirror.gnu.org/gnu/binutils/binutils-2.33.1.tar.xz sources/
+ADD --checksum=sha256:b53606f443ac8f01d1d5fc9c39497f2af322d99e14cea5c0b4b124d630379365 --link https://ftpmirror.gnu.org/gnu/binutils/binutils-2.43.tar.xz sources/
 ADD --checksum=sha256:75d5d255a2a273b6e651f82eecfabf6cbcd8eaeae70e86b417384c8f4a58d8d3 --link https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=3d5db9ebe860 /sources/config.sub
 ADD --checksum=sha256:d08edc536b54c372a1010ff6619dd274c0f1603aa49212ba20f7aa2cda36fa8b --link https://ftpmirror.gnu.org/gnu/gcc/gcc-11.2.0/gcc-11.2.0.tar.xz /sources/
 ADD --checksum=sha256:5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2 --link https://ftpmirror.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 /sources/
