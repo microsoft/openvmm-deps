@@ -13,7 +13,7 @@ ADD --checksum=sha256:ab66fc2d1c3ec0359b8e08843c9f33b63e8707efdff5e4cc5c200eae24
 ADD --checksum=sha256:75d5d255a2a273b6e651f82eecfabf6cbcd8eaeae70e86b417384c8f4a58d8d3 --link https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=3d5db9ebe860 /sources/config.sub
 ADD --checksum=sha256:d08edc536b54c372a1010ff6619dd274c0f1603aa49212ba20f7aa2cda36fa8b --link https://ftpmirror.gnu.org/gnu/gcc/gcc-11.2.0/gcc-11.2.0.tar.xz /sources/
 ADD --checksum=sha256:5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2 --link https://ftpmirror.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 /sources/
-ADD --checksum=sha256:995bc76ccf0c40d752b5ea67c022232a17eef6c9ec80ea74ea742e3c19992813 --link https://ftp.barfooze.de/pub/sabotage/tarballs/linux-headers-4.19.88-1.tar.xz /sources/
+ADD --checksum=sha256:dc7abf734487553644258a3822cfd429d74656749e309f2b25f09f4282e05588 --link https://ftp.barfooze.de/pub/sabotage/tarballs/linux-headers-4.19.88-2.tar.xz /sources/
 ADD --checksum=sha256:6985c538143c1208dcb1ac42cedad6ff52e267b47e5f970183a3e75125b43c2e --link https://ftpmirror.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz /sources/
 ADD --checksum=sha256:c05e3f02d09e0e9019384cdd58e0f19c64e6db1fd6f5ecf77b4b1c61ca253acc --link https://ftpmirror.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.bz2 /sources/
 ADD --checksum=sha256:a9a118bbe84d8764da0ea0d28b3ab3fae8477fc7e4085d90102b8596fc7c75e4 --link https://musl.libc.org/releases/musl-1.2.5.tar.gz /sources/
