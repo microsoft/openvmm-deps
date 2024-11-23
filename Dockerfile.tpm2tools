@@ -1,0 +1,41 @@
+# syntax=docker/dockerfile:1
+
+ARG GUEST_IMAGE=ubuntu:22.04
+
+FROM $GUEST_IMAGE AS guest-builder
+COPY --link .git /.git
+COPY --link src /src
+# Update the system and install required dependencies
+RUN apt update && apt install -y \
+    build-essential \
+    git \
+    pkg-config \
+    libtool \
+    automake \
+    autoconf \
+    autoconf-archive \
+    libjson-c-dev \
+    libssl-dev
+# Build and install curl (dependency for tpm2-tools)
+RUN cd src/curl && \
+    autoreconf -fi && \
+    ./configure --enable-static --disable-shared --with-ssl --without-libpsl && \
+    make -j$(nproc) && \
+    make install
+# Build and install TPM2-TSS (dependency for TPM2-Tools)
+RUN cd /src/tpm2-tss && \
+    ./bootstrap && \
+    ./configure --enable-static --disable-shared && \
+    make -j$(nproc) && \
+    make install
+# Build and install TPM2-Tools
+RUN cd /src/tpm2-tools && \
+    ./bootstrap && \
+    ./configure "CFLAGS=--static"  "LDFLAGS=-lssl" --enable-static --disable-shared --disable-hardening && \
+    make -j$(nproc) && \
+    make install
+# Compress the output binary
+RUN tar -zcf /tpm2.tar.gz /usr/local/bin/tpm2
+
+FROM scratch as output
+COPY --from=guest-builder --link /tpm2.tar.gz /
