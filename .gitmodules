@@ -14,3 +14,12 @@
 [submodule "src/openssl3"]
 	path = src/openssl3
 	url = https://github.com/openssl/openssl
+[submodule "src/curl"]
+	path = src/curl
+	url = https://github.com/curl/curl
+[submodule "src/tpm2-tss"]
+	path = src/tpm2-tss
+	url = https://github.com/tpm2-software/tpm2-tss
+[submodule "src/tpm2-tools"]
+	path = src/tpm2-tools
+	url = https://github.com/tpm2-software/tpm2-tools
