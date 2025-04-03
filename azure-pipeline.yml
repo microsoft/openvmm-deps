@@ -66,5 +66,5 @@ jobs:
         displayName: Create GitHub release
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
         env:
-          token: $(GITHUB_RELEASE_TOKEN)
+          token: $(CREATE_RELEASE_TOKEN)
           version: "0.1.0-$(build.BuildNumber)"
