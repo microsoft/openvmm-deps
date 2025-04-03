@@ -14,7 +14,7 @@ jobs:
 
     - job: ${{ platform.architecture }}
       pool:
-        name: HvLite-CI-Linux-Pool-WestUS2
+        name: HvLite-CI-Linux-Pool-CentralUS
         vmImage: MMSUbuntu20.04-1TB-2
         demands:
             - ImageOverride -equals MMSUbuntu20.04-1TB-2
@@ -39,7 +39,7 @@ jobs:
           publishLocation: pipeline
 
   - job: package
-    pool: HvLite-CI-Linux-Pool-WestUS2
+    pool: HvLite-CI-Linux-Pool-CentralUS
     dependsOn: [aarch64, x86_64]
     steps:
       - checkout: self
