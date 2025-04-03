@@ -1,6 +1,6 @@
 # Configuration for the musl toolchain
 
-GCC_VER = 11.4.0
+GCC_VER = 11.5.0
 MUSL_VER = 1.2.5
 
 # Enable position independent code for all object files by default. This is
