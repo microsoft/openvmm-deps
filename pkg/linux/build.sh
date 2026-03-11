@@ -31,4 +31,7 @@ if [ -f "$config" ]; then
     for image in $KIMAGES; do
         cp "$image" "$SYSROOT/boot/"
     done
+
+    # Export the final config (after olddefconfig) so it can be extracted and committed.
+    cp .config "$SYSROOT/boot/config"
 fi
