@@ -1,9 +1,8 @@
 This repo contains a small build system for openvmm dependencies.
 
-To use, first clone this repo and then init submodules:
+To use, first clone this repo:
 ```bash
-git submodule init
-git submodule update
+git clone https://github.com/microsoft/openvmm-deps
 ```
 
 Then build the Dockerfile to produce the results for the desired architecture:

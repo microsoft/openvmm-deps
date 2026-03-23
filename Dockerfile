@@ -17,6 +17,8 @@ ADD --checksum=sha256:dc7abf734487553644258a3822cfd429d74656749e309f2b25f09f4282
 ADD --checksum=sha256:6985c538143c1208dcb1ac42cedad6ff52e267b47e5f970183a3e75125b43c2e --link https://ftpmirror.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz /sources/
 ADD --checksum=sha256:c05e3f02d09e0e9019384cdd58e0f19c64e6db1fd6f5ecf77b4b1c61ca253acc --link https://ftpmirror.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.bz2 /sources/
 ADD --checksum=sha256:a9a118bbe84d8764da0ea0d28b3ab3fae8477fc7e4085d90102b8596fc7c75e4 --link https://musl.libc.org/releases/musl-1.2.5.tar.gz /sources/
+# musl-cross-make build system (~v0.9.10)
+ADD --link https://github.com/richfelker/musl-cross-make.git#6f3701d08137496d5aac479e3a3977b5ae993c1f /cross/musl-cross-make/
 COPY --link /cross /cross
 ARG TARGETARCH
 ENV TARGETARCH=$TARGETARCH
@@ -34,7 +36,6 @@ COPY --link sysroots /sysroots
 FROM --platform=$BUILDPLATFORM $HOST_IMAGE AS package-builder
 COPY pkg/Tools/deps.sh /pkg/Tools/
 RUN /pkg/Tools/deps.sh
-COPY --link src /src
 COPY --link pkg /pkg
 COPY --link sysroots /sysroots
 ENV PATH="${PATH}:/opt/cross/bin"
@@ -63,13 +64,26 @@ RUN BUILD_CPIO=1 /pkg/Tools/build.sh sysroots/shell
 FROM scratch AS result-shell
 COPY --from=build-shell --link /out/sysroot.cpio.gz /shell.cpio.gz
 
+# Source repositories -- pinned by commit hash.
+# linux v6.1.74 (linux-6.1.y)
+FROM scratch AS src-linux
+ADD --link https://github.com/gregkh/linux.git#8fd7f44624538675abadc73f5a44e95016964d22 /
+# llvm-project (release/17.x) -- used by libunwind and sdk
+FROM scratch AS src-llvm
+ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb6a803753fe18 /
+# openssl (~3.2.0-dev)
+FROM scratch AS src-openssl
+ADD --link https://github.com/openssl/openssl.git#27315a978e280a20c7f3ea0bfe05f6c186137625 /
+
 # Build the sdk.
 #
 # Note that this pulls from the cross compiler and doesn't use the target
 # builder.
 FROM --platform=$BUILDPLATFORM package-builder AS build-sdk
 RUN ln -s /opt/cross/*-linux-musl /sysroot
-RUN /pkg/Tools/build.sh sysroots/sdk
+RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
+    --mount=type=bind,from=src-openssl,source=/,target=/pkg/openssl3/src,rw \
+    /pkg/Tools/build.sh sysroots/sdk
 FROM scratch AS result-sdk
 COPY --from=build-sdk --link /out/sysroot.tar.gz /sysroot.tar.gz
 
@@ -85,13 +99,15 @@ COPY --from=build-initrd --link /out/sysroot.cpio.gz /initrd
 
 # Build the Linux test package.
 FROM --platform=$BUILDPLATFORM package-builder AS build-linux
-RUN /pkg/Tools/build.sh sysroots/linux
+RUN --mount=type=bind,from=src-linux,source=/,target=/pkg/linux/src \
+    /pkg/Tools/build.sh sysroots/linux
 FROM scratch AS result-linux
 COPY --from=build-linux --link /sysroot/boot /
 COPY --from=result-initrd --link / /
 
 FROM --platform=$BUILDPLATFORM package-builder AS result-libunwind
-RUN /pkg/Tools/build.sh pkg/libunwind
+RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
+    /pkg/Tools/build.sh pkg/libunwind
 RUN find /sysroot
 
 # Build the output.

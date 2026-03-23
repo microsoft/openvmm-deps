@@ -21,7 +21,6 @@ jobs:
       timeoutInMinutes: 480
       steps:
       - checkout: self
-        submodules: true
         fetchDepth: 1
 
       - bash: sudo apt-get install qemu-user-static -y
