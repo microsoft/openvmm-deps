@@ -110,9 +110,20 @@ RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
     /pkg/Tools/build.sh pkg/libunwind
 RUN find /sysroot
 
+# Build base image for perftools.
+FROM target-builder AS base-perftools
+RUN /pkg/Tools/build.sh sysroots/perftools
+# Build perftools as EROFS image.
+FROM --platform=$BUILDPLATFORM package-builder AS build-perftools
+COPY --from=base-perftools --link /sysroot /sysroot
+RUN BUILD_EROFS=1 /pkg/Tools/build.sh sysroots/perftools
+FROM scratch AS result-perftools
+COPY --from=build-perftools --link /out/sysroot.erofs /perftools.erofs
+
 # Build the output.
 FROM scratch AS output
 COPY --from=result-dbgrd --link / /
 COPY --from=result-shell --link / /
 COPY --from=result-sdk --link / /
 COPY --from=result-linux --link / /
+COPY --from=result-perftools --link / /
