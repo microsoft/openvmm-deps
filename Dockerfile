@@ -110,9 +110,20 @@ RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
     /pkg/Tools/build.sh pkg/libunwind
 RUN find /sysroot
 
+# Build base image for petritools.
+FROM target-builder AS base-petritools
+RUN /pkg/Tools/build.sh sysroots/petritools
+# Build petritools as EROFS image.
+FROM --platform=$BUILDPLATFORM package-builder AS build-petritools
+COPY --from=base-petritools --link /sysroot /sysroot
+RUN BUILD_EROFS=1 /pkg/Tools/build.sh sysroots/petritools
+FROM scratch AS result-petritools
+COPY --from=build-petritools --link /out/sysroot.erofs /petritools.erofs
+
 # Build the output.
 FROM scratch AS output
 COPY --from=result-dbgrd --link / /
 COPY --from=result-shell --link / /
 COPY --from=result-sdk --link / /
 COPY --from=result-linux --link / /
+COPY --from=result-petritools --link / /

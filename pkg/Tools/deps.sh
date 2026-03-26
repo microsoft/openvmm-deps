@@ -14,6 +14,7 @@ bison
 cmake
 diffutils
 elfutils-libelf-devel
+erofs-utils
 flex
 kernel-headers
 gawk
