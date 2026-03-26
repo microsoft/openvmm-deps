@@ -96,7 +96,7 @@ done
 rm -rf "$SYSROOT/var/cache/tdnf" "$SYSROOT/var/lib/rpm" "$SYSROOT/usr/share/man" "$SYSROOT/usr/share/doc"
 
 if [ -n "$BUILD_EROFS" ]; then
-    mkfs.erofs -zlz4hc "${OUTPUTDIR}/sysroot.erofs" "$SYSROOT"
+    mkfs.erofs -zlz4hc -Efragments,dedupe "${OUTPUTDIR}/sysroot.erofs" "$SYSROOT"
 elif [ -z "$BUILD_CPIO" ]; then
     tar -zcf "${OUTPUTDIR}/sysroot.tar.gz" -C "$SYSROOT" --exclude ./dev --exclude ./proc .
 else
