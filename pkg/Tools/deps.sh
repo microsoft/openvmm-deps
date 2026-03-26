@@ -13,6 +13,7 @@ binutils
 bison
 cmake
 diffutils
+elfutils-libelf-devel
 flex
 kernel-headers
 gawk
