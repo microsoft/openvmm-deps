@@ -1,0 +1,9 @@
+# Performance tools rootfs.
+pkg/busybox
+ethtool
+fio
+iperf3
+kernel-tools
+nvme-cli
+strace
+util-linux

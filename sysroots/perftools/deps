@@ -1,5 +1,0 @@
-# Benchmark rootfs with fio, iperf3, and perf.
-pkg/busybox
-fio
-iperf3
-kernel-tools
