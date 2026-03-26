@@ -13,6 +13,7 @@ binutils
 bison
 cmake
 diffutils
+elfutils-libelf-devel
 flex
 kernel-headers
 gawk
@@ -24,6 +25,7 @@ make
 meson
 openssl-devel
 patch
+perl
 pkgconf
 tar
 util-linux

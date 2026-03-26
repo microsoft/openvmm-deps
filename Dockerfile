@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
-ARG HOST_IMAGE=mcr.microsoft.com/cbl-mariner/base/core:2.0
-ARG TARGET_IMAGE=mcr.microsoft.com/cbl-mariner/base/core:2.0
+ARG HOST_IMAGE=mcr.microsoft.com/azurelinux/base/core:3.0
+ARG TARGET_IMAGE=mcr.microsoft.com/azurelinux/base/core:3.0
 
 # Build the musl toolchain
 FROM --platform=$BUILDPLATFORM $HOST_IMAGE AS cross-builder
