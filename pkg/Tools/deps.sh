@@ -24,7 +24,7 @@ make
 meson
 openssl-devel
 patch
-perl-FindBin
+perl
 pkgconf
 tar
 util-linux
