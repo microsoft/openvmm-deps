@@ -5,5 +5,5 @@ extern "C" {
 }
 
 fn main() {
-    unsafe { sample_entrypoint(b"hello\0".as_ptr().cast()) }
+    unsafe { sample_entrypoint(c"hello".as_ptr().cast()) }
 }
