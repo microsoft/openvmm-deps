@@ -1,0 +1,57 @@
+diff --git a/.gitignore b/.gitignore
+index ef37702..f8701cd 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -74,6 +74,7 @@ scbuild.log
+ 
+ # Cmake output
+ bin*/
++output/
+ CMakeFiles
+ CMakeCache.txt
+ **/cmake_install.*
+diff --git a/modules/posix/common/ModuleCommon.cmake b/modules/posix/common/ModuleCommon.cmake
+index fba3785..486010e 100644
+--- a/modules/posix/common/ModuleCommon.cmake
++++ b/modules/posix/common/ModuleCommon.cmake
+@@ -27,7 +27,26 @@ else()
+     set(OBJCOPY_COMMAND objcopy)
+ endif()
+ 
+-if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
++get_target_property(_symcrypt_target_type ${TARGET_NAME} TYPE)
++if (_symcrypt_target_type STREQUAL "STATIC_LIBRARY")
++  # For a static archive, merge the dependency archives' objects into our own
++  # .a as a post-build step by extracting objects from each dependency archive
++  # and adding them to the target archive.
++  set(_symcrypt_merge_workdir ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_merge)
++  add_custom_command(
++    TARGET ${TARGET_NAME}
++    POST_BUILD
++    COMMAND ${CMAKE_COMMAND} -E rm -rf ${_symcrypt_merge_workdir}
++    COMMAND ${CMAKE_COMMAND} -E make_directory ${_symcrypt_merge_workdir}
++    COMMAND ${CMAKE_COMMAND} -E chdir ${_symcrypt_merge_workdir} ${CMAKE_AR} x $<TARGET_FILE:symcrypt_module_posix_common>
++    COMMAND ${CMAKE_COMMAND} -E chdir ${_symcrypt_merge_workdir} ${CMAKE_AR} x $<TARGET_FILE:symcrypt_posixusermode>
++    COMMAND ${CMAKE_COMMAND} -E chdir ${_symcrypt_merge_workdir} ${CMAKE_AR} x $<TARGET_FILE:symcrypt_common>
++    COMMAND ${CMAKE_COMMAND} -E chdir ${_symcrypt_merge_workdir} sh -c "${CMAKE_AR} rcs $<TARGET_FILE:${TARGET_NAME}> *.o"
++    COMMAND ${CMAKE_COMMAND} -E rm -rf ${_symcrypt_merge_workdir}
++    COMMENT "Merging dependency archives into $<TARGET_FILE_NAME:${TARGET_NAME}>"
++    VERBATIM
++  )
++elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+   target_link_options(${TARGET_NAME} PRIVATE
+     -Wl,-all_load
+     $<TARGET_FILE:symcrypt_module_posix_common>
+diff --git a/modules/posix/generic/CMakeLists.txt b/modules/posix/generic/CMakeLists.txt
+index 620977c..1e9c588 100644
+--- a/modules/posix/generic/CMakeLists.txt
++++ b/modules/posix/generic/CMakeLists.txt
+@@ -18,7 +18,7 @@ endif()
+ 
+ include_directories(${SYMCRYPT_SOURCE_DIR}/inc ../common ${SYMCRYPT_SOURCE_DIR}/3rdparty/jitterentropy-library)
+ 
+-add_library(symcrypt_generic_posix SHARED ${SOURCES})
++add_library(symcrypt_generic_posix STATIC ${SOURCES})
+ 
+ if(SYMCRYPT_FIPS_BUILD)
+     # Link jitterentropy
