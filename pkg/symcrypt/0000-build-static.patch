@@ -1,15 +1,3 @@
-diff --git a/.gitignore b/.gitignore
-index ef37702..f8701cd 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -74,6 +74,7 @@ scbuild.log
- 
- # Cmake output
- bin*/
-+output/
- CMakeFiles
- CMakeCache.txt
- **/cmake_install.*
 diff --git a/modules/posix/common/ModuleCommon.cmake b/modules/posix/common/ModuleCommon.cmake
 index fba3785..486010e 100644
 --- a/modules/posix/common/ModuleCommon.cmake
