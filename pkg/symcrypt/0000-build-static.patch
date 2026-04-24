@@ -1,3 +1,13 @@
+From 1a82aa2bb96898e9d5ac44b383f20ee1ce13fef8 Mon Sep 17 00:00:00 2001
+From: Steven Malis <stevenmalis@microsoft.com>
+Date: Fri, 24 Apr 2026 17:31:20 -0400
+Subject: [PATCH] Change the symcrypt_generic_posix target to build a static library
+
+---
+ modules/posix/common/ModuleCommon.cmake | 21 ++++++++++++++++++++-
+ modules/posix/generic/CMakeLists.txt    |  2 +-
+ 2 files changed, 21 insertions(+), 2 deletions(-)
+
 diff --git a/modules/posix/common/ModuleCommon.cmake b/modules/posix/common/ModuleCommon.cmake
 index fba3785..486010e 100644
 --- a/modules/posix/common/ModuleCommon.cmake
@@ -43,3 +53,6 @@ index 620977c..1e9c588 100644
  
  if(SYMCRYPT_FIPS_BUILD)
      # Link jitterentropy
+-- 
+2.43.0
+
