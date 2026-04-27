@@ -19,6 +19,7 @@ flex
 kernel-headers
 gawk
 gcc
+git
 glibc-devel
 libarchive
 libtool
@@ -28,6 +29,8 @@ openssl-devel
 patch
 perl
 pkgconf
+python3
+python3-pyelftools
 tar
 util-linux
 "

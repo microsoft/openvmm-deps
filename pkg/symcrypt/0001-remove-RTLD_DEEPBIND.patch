@@ -1,0 +1,13 @@
+diff --git a/unittest/exe_posix/main_exe.cpp b/unittest/exe_posix/main_exe.cpp
+index df8ebb9..10f5358 100644
+--- a/unittest/exe_posix/main_exe.cpp
++++ b/unittest/exe_posix/main_exe.cpp
+@@ -12,7 +12,7 @@ SYMCRYPT_ENVIRONMENT_DEFS(Unittest);
+ #include <dlfcn.h>
+ #include <sys/random.h>
+ 
+-#if SYMCRYPT_PLATFORM_APPLE
++#ifndef RTLD_DEEPBIND
+     #define DLOPEN_FLAGS (RTLD_NOW)
+ #else
+     #define DLOPEN_FLAGS (RTLD_NOW | RTLD_DEEPBIND)

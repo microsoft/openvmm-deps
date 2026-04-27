@@ -10,3 +10,4 @@ CXXFLAGS=$CXXFLAGS -fno-omit-frame-pointer -Os
 
 pkg/libunwind
 pkg/openssl3
+pkg/symcrypt

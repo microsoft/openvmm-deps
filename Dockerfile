@@ -74,6 +74,10 @@ ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb
 # openssl (~3.2.0-dev)
 FROM scratch AS src-openssl
 ADD --link https://github.com/openssl/openssl.git#27315a978e280a20c7f3ea0bfe05f6c186137625 /
+# symcrypt (v103.11.0)
+# SymCrypt requires git metadata during its build
+FROM scratch AS src-symcrypt
+ADD --keep-git-dir=true --link https://github.com/microsoft/symcrypt.git#748c20f1fc486beca1a2679ed06492712cfdc950 /
 
 # Build the sdk.
 #
@@ -83,6 +87,7 @@ FROM --platform=$BUILDPLATFORM package-builder AS build-sdk
 RUN ln -s /opt/cross/*-linux-musl /sysroot
 RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
     --mount=type=bind,from=src-openssl,source=/,target=/pkg/openssl3/src,rw \
+    --mount=type=bind,from=src-symcrypt,source=/,target=/pkg/symcrypt/src,rw \
     /pkg/Tools/build.sh sysroots/sdk
 FROM scratch AS result-sdk
 COPY --from=build-sdk --link /out/sysroot.tar.gz /sysroot.tar.gz

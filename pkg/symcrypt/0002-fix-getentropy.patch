@@ -1,0 +1,13 @@
+diff --git a/modules/posix/common/optional/rngsecureurandom.c b/modules/posix/common/optional/rngsecureurandom.c
+index b6d7d7a..fbc4f25 100644
+--- a/modules/posix/common/optional/rngsecureurandom.c
++++ b/modules/posix/common/optional/rngsecureurandom.c
+@@ -6,7 +6,7 @@
+ //
+ 
+ #include "precomp.h"
+-#include <sys/random.h>
++#include <unistd.h>
+ 
+ // Nothing to init
+ VOID

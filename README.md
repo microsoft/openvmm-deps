@@ -5,6 +5,11 @@ To use, first clone this repo:
 git clone https://github.com/microsoft/openvmm-deps
 ```
 
+If you are cross-compiling you will need qemu-user-static:
+```bash
+apt install qemu-user-static
+```
+
 Then build the Dockerfile to produce the results for the desired architecture:
 
 ```bash
