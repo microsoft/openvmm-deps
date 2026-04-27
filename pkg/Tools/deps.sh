@@ -19,6 +19,7 @@ flex
 kernel-headers
 gawk
 gcc
+git
 glibc-devel
 libarchive
 libtool

@@ -75,10 +75,9 @@ ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb
 FROM scratch AS src-openssl
 ADD --link https://github.com/openssl/openssl.git#27315a978e280a20c7f3ea0bfe05f6c186137625 /
 # symcrypt (v103.11.0)
-# SymCrypt requires git metadata to be specified in its build.sh in order to build correctly.
-# When updating this commit, make sure you update pkg/symcrypt/build.sh too!
+# SymCrypt requires git metadata during its build
 FROM scratch AS src-symcrypt
-ADD --link https://github.com/microsoft/symcrypt.git#748c20f1fc486beca1a2679ed06492712cfdc950 /
+ADD --keep-git-dir=true --link https://github.com/microsoft/symcrypt.git#748c20f1fc486beca1a2679ed06492712cfdc950 /
 
 # Build the sdk.
 #
