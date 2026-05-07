@@ -37,6 +37,20 @@ jobs:
           artifact: ${{ platform.architecture }}
           publishLocation: pipeline
 
+  - job: cgmanifest
+    displayName: Verify cgmanifest.json is in sync with Dockerfile
+    pool:
+      name: HvLite-CI-Linux-Pool-WestUS2
+      vmImage: MMSUbuntu20.04-1TB-2
+      demands:
+          - ImageOverride -equals MMSUbuntu20.04-1TB-2
+    steps:
+      - checkout: self
+        fetchDepth: 1
+
+      - bash: python3 pkg/Tools/gen-cgmanifest.py --check
+        displayName: gen-cgmanifest.py --check
+
   - job: package
     pool: HvLite-CI-Linux-Pool-WestUS2
     dependsOn: [aarch64, x86_64]
