@@ -165,6 +165,17 @@
       },
       "developmentDependency": false,
       "licensesConcluded": ["Apache-2.0"]
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/microsoft/SymCrypt",
+          "commitHash": "748c20f1fc486beca1a2679ed06492712cfdc950"
+        }
+      },
+      "developmentDependency": false,
+      "licensesConcluded": ["MIT"]
     }
   ]
 }
