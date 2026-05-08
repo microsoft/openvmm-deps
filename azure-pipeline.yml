@@ -30,6 +30,15 @@ jobs:
       - bash: docker build --platform "${{ platform.architecture }}" --output type=local,dest=out .
         displayName: Build ${{ platform.architecture }} outputs
 
+      - bash: |
+          set -euo pipefail
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
+              | sh -s -- -b /usr/local/bin v1.14.1
+          syft version
+          chmod +x pkg/Tools/gen-sboms.sh
+          pkg/Tools/gen-sboms.sh out out/sboms
+        displayName: Generate SPDX SBOMs (${{ platform.architecture }})
+
       - task: PublishPipelineArtifact@1
         displayName: 'Publish output'
         inputs:

@@ -92,8 +92,11 @@ for pkg in "${pkgs[@]}"; do
     fi
 done
 
-# Remove package indexes and other cruft.
-rm -rf "$SYSROOT/var/cache/tdnf" "$SYSROOT/var/lib/rpm" "$SYSROOT/usr/share/man" "$SYSROOT/usr/share/doc"
+# Remove tdnf cache, man pages, and docs to shrink the rootfs.
+# Intentionally keep /var/lib/rpm so SBOM tools (syft, sbom-tool,
+# Component Detection's Linux detector) can enumerate installed
+# packages from the shipped artifact.
+rm -rf "$SYSROOT/var/cache/tdnf" "$SYSROOT/usr/share/man" "$SYSROOT/usr/share/doc"
 
 if [ -n "$BUILD_EROFS" ]; then
     mkfs.erofs -zlz4hc -Efragments,dedupe "${OUTPUTDIR}/sysroot.erofs" "$SYSROOT"
