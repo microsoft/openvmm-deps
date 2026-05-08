@@ -11,18 +11,20 @@
           "downloadUrl": "https://ftpmirror.gnu.org/gnu/binutils/binutils-2.33.1.tar.xz",
           "hash": "ab66fc2d1c3ec0359b8e08843c9f33b63e8707efdff5e4cc5c200eae24722cbf"
         }
-      }
+      },
+      "license": "GPL-3.0-or-later"
     },
     {
       "component": {
         "type": "other",
         "other": {
-          "name": "unknown",
-          "version": "0",
+          "name": "config",
+          "version": "rev3d5db9ebe860",
           "downloadUrl": "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=3d5db9ebe860",
           "hash": "75d5d255a2a273b6e651f82eecfabf6cbcd8eaeae70e86b417384c8f4a58d8d3"
         }
-      }
+      },
+      "license": "GPL-3.0-or-later WITH Autoconf-exception-3.0"
     },
     {
       "component": {
@@ -33,7 +35,8 @@
           "downloadUrl": "https://ftpmirror.gnu.org/gnu/gcc/gcc-11.5.0/gcc-11.5.0.tar.xz",
           "hash": "a6e21868ead545cf87f0c01f84276e4b5281d672098591c1c896241f09363478"
         }
-      }
+      },
+      "license": "GPL-3.0-or-later WITH GCC-exception-3.1"
     },
     {
       "component": {
@@ -44,7 +47,8 @@
           "downloadUrl": "https://ftpmirror.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2",
           "hash": "5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2"
         }
-      }
+      },
+      "license": "LGPL-3.0-or-later"
     },
     {
       "component": {
@@ -55,7 +59,8 @@
           "downloadUrl": "https://ftp.barfooze.de/pub/sabotage/tarballs/linux-headers-4.19.88-2.tar.xz",
           "hash": "dc7abf734487553644258a3822cfd429d74656749e309f2b25f09f4282e05588"
         }
-      }
+      },
+      "license": "GPL-2.0-only"
     },
     {
       "component": {
@@ -66,7 +71,8 @@
           "downloadUrl": "https://ftpmirror.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz",
           "hash": "6985c538143c1208dcb1ac42cedad6ff52e267b47e5f970183a3e75125b43c2e"
         }
-      }
+      },
+      "license": "LGPL-3.0-or-later"
     },
     {
       "component": {
@@ -77,7 +83,8 @@
           "downloadUrl": "https://ftpmirror.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.bz2",
           "hash": "c05e3f02d09e0e9019384cdd58e0f19c64e6db1fd6f5ecf77b4b1c61ca253acc"
         }
-      }
+      },
+      "license": "LGPL-3.0-or-later"
     },
     {
       "component": {
@@ -88,7 +95,8 @@
           "downloadUrl": "https://musl.libc.org/releases/musl-1.2.5.tar.gz",
           "hash": "a9a118bbe84d8764da0ea0d28b3ab3fae8477fc7e4085d90102b8596fc7c75e4"
         }
-      }
+      },
+      "license": "MIT"
     },
     {
       "component": {
@@ -97,7 +105,8 @@
           "repositoryUrl": "https://github.com/richfelker/musl-cross-make",
           "commitHash": "6f3701d08137496d5aac479e3a3977b5ae993c1f"
         }
-      }
+      },
+      "license": "MIT"
     },
     {
       "component": {
@@ -106,7 +115,8 @@
           "repositoryUrl": "https://github.com/gregkh/linux",
           "commitHash": "8fd7f44624538675abadc73f5a44e95016964d22"
         }
-      }
+      },
+      "license": "GPL-2.0-only"
     },
     {
       "component": {
@@ -115,7 +125,8 @@
           "repositoryUrl": "https://github.com/llvm/llvm-project",
           "commitHash": "6009708b4367171ccdbf4b5905cb6a803753fe18"
         }
-      }
+      },
+      "license": "Apache-2.0 WITH LLVM-exception"
     },
     {
       "component": {
@@ -124,7 +135,8 @@
           "repositoryUrl": "https://github.com/openssl/openssl",
           "commitHash": "27315a978e280a20c7f3ea0bfe05f6c186137625"
         }
-      }
+      },
+      "license": "Apache-2.0"
     },
     {
       "component": {
@@ -133,6 +145,117 @@
           "repositoryUrl": "https://github.com/microsoft/symcrypt",
           "commitHash": "748c20f1fc486beca1a2679ed06492712cfdc950"
         }
+      },
+      "license": "MIT"
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://www.busybox.net/downloads/busybox-1.36.1.tar.bz2",
+          "name": "busybox",
+          "version": "1.36.1"
+        },
+        "type": "other"
+      }
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://www.kernel.org/pub/software/network/ethtool/ethtool-6.4.tar.xz",
+          "name": "ethtool",
+          "version": "6.4"
+        },
+        "type": "other"
+      }
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://github.com/axboe/fio/archive/refs/tags/fio-3.37.tar.gz",
+          "name": "fio",
+          "version": "3.37"
+        },
+        "type": "other"
+      }
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://ftp.gnu.org/gnu/gdb/gdb-13.2.tar.xz",
+          "name": "gdb",
+          "version": "13.2"
+        },
+        "type": "other"
+      }
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://github.com/htop-dev/htop/archive/3.2.2.tar.gz",
+          "name": "htop",
+          "version": "3.2.2"
+        },
+        "type": "other"
+      }
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://github.com/esnet/iperf/archive/3.17.1.tar.gz",
+          "name": "iperf3",
+          "version": "3.17.1"
+        },
+        "type": "other"
+      }
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://github.com/microsoft/CBL-Mariner-Linux-Kernel/archive/rolling-lts/mariner-3/6.6.137.1.tar.gz",
+          "name": "kernel",
+          "version": "6.6.137.1"
+        },
+        "type": "other"
+      }
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://github.com/linux-nvme/nvme-cli/archive/v2.8.tar.gz",
+          "name": "nvme-cli",
+          "version": "2.8"
+        },
+        "type": "other"
+      }
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://www.kernel.org/pub/software/utils/pciutils/pciutils-3.11.1.tar.gz",
+          "name": "pciutils",
+          "version": "3.11.1"
+        },
+        "type": "other"
+      }
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://strace.io/files/6.8/strace-6.8.tar.xz",
+          "name": "strace",
+          "version": "6.8"
+        },
+        "type": "other"
+      }
+    },
+    {
+      "component": {
+        "other": {
+          "downloadUrl": "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.40/util-linux-2.40.2.tar.xz",
+          "name": "util-linux",
+          "version": "2.40.2"
+        },
+        "type": "other"
       }
     }
   ]
