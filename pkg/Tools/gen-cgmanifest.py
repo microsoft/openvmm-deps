@@ -19,8 +19,13 @@ regs = []
 for m in re.finditer(r"^\s*ADD\s+(.+)$", text, re.M):
     rest = m.group(1)
     if g := re.search(r"(https?://\S+?)\.git#([0-9a-f]{40})\b", rest):
-        regs.append({"component": {"type": "git", "git": {
-            "repositoryUrl": g.group(1), "commitHash": g.group(2)}}})
+        reg = {"component": {"type": "git", "git": {
+            "repositoryUrl": g.group(1), "commitHash": g.group(2)}}}
+        # ClearlyDefined doesn't have license data for our pinned llvm-project
+        # commit, so attach it explicitly to avoid CG "Missing legal information".
+        if g.group(1).endswith("/llvm/llvm-project"):
+            reg["license"] = "Apache-2.0 WITH LLVM-exception"
+        regs.append(reg)
     elif (c := re.search(r"--checksum=sha256:([0-9a-f]{64})", rest)) and \
          (u := re.search(r"https?://\S+", rest)):
         fname = u.group(0).rsplit("/", 1)[-1].split("?")[0]
