@@ -16,7 +16,10 @@ MANIFEST = ROOT / "cgmanifest.json"
 text = re.sub(r"\\\r?\n\s*", " ", (ROOT / "Dockerfile").read_text())
 
 regs = []
-for m in re.finditer(r"^\s*ADD\s+(.+)$", text, re.M):
+# Real ADD lines, plus `# cg-add:` directives for vendored files (which
+# replace ADDs whose remote sources are unreliable but whose bytes are
+# still tracked here for component governance).
+for m in re.finditer(r"^\s*(?:ADD|#\s*cg-add:)\s+(.+)$", text, re.M):
     rest = m.group(1)
     if g := re.search(r"(https?://\S+?)\.git#([0-9a-f]{40})\b", rest):
         regs.append({"component": {"type": "git", "git": {

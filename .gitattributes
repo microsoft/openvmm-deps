@@ -1,0 +1,3 @@
+# Vendored Linux shell script — must stay LF-terminated even on Windows
+# checkouts so that COPY into the Linux container produces a runnable file.
+cross/sources/config.sub text eol=lf
