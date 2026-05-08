@@ -30,14 +30,14 @@ scan() {
     mkdir -p "$extracted"
     case "$artifact" in
         *.cpio.gz)
-            bsdtar -xf "$artifact" -C "$extracted"
+            gunzip -c "$artifact" | (cd "$extracted" && cpio -idm 2>/dev/null)
             ;;
         *.tar.gz|*.tgz)
             tar -xzf "$artifact" -C "$extracted"
             ;;
         initrd)
             # initrd is a gzipped cpio archive (see Dockerfile build-initrd stage).
-            bsdtar -xf "$artifact" -C "$extracted"
+            gunzip -c "$artifact" | (cd "$extracted" && cpio -idm 2>/dev/null)
             ;;
         *)
             echo "Skipping unsupported artifact format: $artifact" >&2
