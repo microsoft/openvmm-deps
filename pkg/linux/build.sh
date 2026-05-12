@@ -14,8 +14,8 @@ esac
 
 case $KARCH in
     x86_64)
-        KTARGETS=vmlinux
-        KIMAGES="./vmlinux"
+        KTARGETS="vmlinux bzImage"
+        KIMAGES="./vmlinux ./arch/x86/boot/bzImage"
         ;;
     arm64)
         KTARGETS="vmlinux Image"
