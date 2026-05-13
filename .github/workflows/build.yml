@@ -1,0 +1,81 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  cgmanifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Verify cgmanifest.json is in sync with Dockerfile
+        run: python3 pkg/Tools/gen-cgmanifest.py --check
+
+  build:
+    strategy:
+      matrix:
+        include:
+          - architecture: aarch64
+          - architecture: x86_64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up QEMU
+        if: matrix.architecture == 'aarch64'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ matrix.architecture }} outputs
+        run: docker build --platform "${{ matrix.architecture }}" --output type=local,dest=out .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.architecture }}
+          path: out
+
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      contents: write
+    steps:
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: out
+
+      - name: Build package
+        run: |
+          cd out
+          mkdir package
+          tar cvzf "package/openvmm-deps.x86_64.0.2.0-${{ github.run_number }}.tar.gz" -C x86_64 .
+          tar cvzf "package/openvmm-deps.aarch64.0.2.0-${{ github.run_number }}.tar.gz" -C aarch64 .
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: "0.2.0-${{ github.run_number }}"
+        run: |
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --generate-notes \
+            --repo "$GITHUB_REPOSITORY" \
+            "out/package/openvmm-deps.x86_64.$VERSION.tar.gz" \
+            "out/package/openvmm-deps.aarch64.$VERSION.tar.gz"
