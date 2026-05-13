@@ -9,14 +9,28 @@ COPY /cross/deps.sh /cross/
 RUN /cross/deps.sh
 # Download sources. build.sh can do this for us, but then they won't be cached.
 # Plus, this allows us to validate a SHA256 checksum instead of just SHA1.
-ADD --checksum=sha256:ab66fc2d1c3ec0359b8e08843c9f33b63e8707efdff5e4cc5c200eae24722cbf --link https://ftpmirror.gnu.org/gnu/binutils/binutils-2.33.1.tar.xz sources/
-ADD --checksum=sha256:75d5d255a2a273b6e651f82eecfabf6cbcd8eaeae70e86b417384c8f4a58d8d3 --link https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=3d5db9ebe860 /sources/config.sub
-ADD --checksum=sha256:a6e21868ead545cf87f0c01f84276e4b5281d672098591c1c896241f09363478 --link https://ftpmirror.gnu.org/gnu/gcc/gcc-11.5.0/gcc-11.5.0.tar.xz /sources/
-ADD --checksum=sha256:5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2 --link https://ftpmirror.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 /sources/
-ADD --checksum=sha256:dc7abf734487553644258a3822cfd429d74656749e309f2b25f09f4282e05588 --link https://ftp.barfooze.de/pub/sabotage/tarballs/linux-headers-4.19.88-2.tar.xz /sources/
-ADD --checksum=sha256:6985c538143c1208dcb1ac42cedad6ff52e267b47e5f970183a3e75125b43c2e --link https://ftpmirror.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz /sources/
-ADD --checksum=sha256:c05e3f02d09e0e9019384cdd58e0f19c64e6db1fd6f5ecf77b4b1c61ca253acc --link https://ftpmirror.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.bz2 /sources/
-ADD --checksum=sha256:a9a118bbe84d8764da0ea0d28b3ab3fae8477fc7e4085d90102b8596fc7c75e4 --link https://musl.libc.org/releases/musl-1.2.5.tar.gz /sources/
+#
+# These tarballs are mirrored to the openvmm-deps `sources-v1` GitHub
+# Release for build reliability (the upstream endpoints are flaky and
+# break CI). The `# upstream:` comment above each ADD records the
+# canonical upstream URL for cgmanifest / Component Governance; the
+# bytes are sha256-pinned so the substitution is byte-equivalent.
+# upstream: https://ftpmirror.gnu.org/gnu/binutils/binutils-2.33.1.tar.xz
+ADD --checksum=sha256:ab66fc2d1c3ec0359b8e08843c9f33b63e8707efdff5e4cc5c200eae24722cbf --link https://github.com/microsoft/openvmm-deps/releases/download/sources-v1/binutils-2.33.1.tar.xz /sources/
+# upstream: https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=3d5db9ebe860
+ADD --checksum=sha256:75d5d255a2a273b6e651f82eecfabf6cbcd8eaeae70e86b417384c8f4a58d8d3 --link https://github.com/microsoft/openvmm-deps/releases/download/sources-v1/config.sub /sources/config.sub
+# upstream: https://ftpmirror.gnu.org/gnu/gcc/gcc-11.5.0/gcc-11.5.0.tar.xz
+ADD --checksum=sha256:a6e21868ead545cf87f0c01f84276e4b5281d672098591c1c896241f09363478 --link https://github.com/microsoft/openvmm-deps/releases/download/sources-v1/gcc-11.5.0.tar.xz /sources/
+# upstream: https://ftpmirror.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2
+ADD --checksum=sha256:5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2 --link https://github.com/microsoft/openvmm-deps/releases/download/sources-v1/gmp-6.1.2.tar.bz2 /sources/
+# upstream: https://ftp.barfooze.de/pub/sabotage/tarballs/linux-headers-4.19.88-2.tar.xz
+ADD --checksum=sha256:dc7abf734487553644258a3822cfd429d74656749e309f2b25f09f4282e05588 --link https://github.com/microsoft/openvmm-deps/releases/download/sources-v1/linux-headers-4.19.88-2.tar.xz /sources/
+# upstream: https://ftpmirror.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz
+ADD --checksum=sha256:6985c538143c1208dcb1ac42cedad6ff52e267b47e5f970183a3e75125b43c2e --link https://github.com/microsoft/openvmm-deps/releases/download/sources-v1/mpc-1.1.0.tar.gz /sources/
+# upstream: https://ftpmirror.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.bz2
+ADD --checksum=sha256:c05e3f02d09e0e9019384cdd58e0f19c64e6db1fd6f5ecf77b4b1c61ca253acc --link https://github.com/microsoft/openvmm-deps/releases/download/sources-v1/mpfr-4.0.2.tar.bz2 /sources/
+# upstream: https://musl.libc.org/releases/musl-1.2.5.tar.gz
+ADD --checksum=sha256:a9a118bbe84d8764da0ea0d28b3ab3fae8477fc7e4085d90102b8596fc7c75e4 --link https://github.com/microsoft/openvmm-deps/releases/download/sources-v1/musl-1.2.5.tar.gz /sources/
 # musl-cross-make build system (~v0.9.10)
 ADD --link https://github.com/richfelker/musl-cross-make.git#6f3701d08137496d5aac479e3a3977b5ae993c1f /cross/musl-cross-make/
 COPY --link /cross /cross
