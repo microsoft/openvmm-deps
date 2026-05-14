@@ -6,8 +6,8 @@ direct boot (`Firmware::LinuxDirect`).
 
 ## Files
 
-- `x86_64.config` — Kernel config for x86_64 (kernel 6.1.74)
-- `aarch64.config` — Kernel config for aarch64 (kernel 6.1.74)
+- `x86_64.config` — Kernel config for x86_64 (kernel 6.1.172)
+- `aarch64.config` — Kernel config for aarch64 (kernel 6.1.172)
 - `build.sh` — Build script invoked by the Docker build
 
 ## Updating the kernel configs

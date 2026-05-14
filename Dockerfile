@@ -79,9 +79,9 @@ FROM scratch AS result-shell
 COPY --from=build-shell --link /out/sysroot.cpio.gz /shell.cpio.gz
 
 # Source repositories -- pinned by commit hash.
-# linux v6.1.74 (linux-6.1.y)
+# linux v6.1.172 (linux-6.1.y)
 FROM scratch AS src-linux
-ADD --link https://github.com/gregkh/linux.git#8fd7f44624538675abadc73f5a44e95016964d22 /
+ADD --link https://github.com/gregkh/linux.git#ad16b162f21d970235ced0c7e36e960c227317e8 /
 # llvm-project (release/17.x) -- used by libunwind and sdk
 FROM scratch AS src-llvm
 ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb6a803753fe18 /

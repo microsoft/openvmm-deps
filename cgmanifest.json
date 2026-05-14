@@ -112,7 +112,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://github.com/gregkh/linux",
-          "commitHash": "8fd7f44624538675abadc73f5a44e95016964d22"
+          "commitHash": "ad16b162f21d970235ced0c7e36e960c227317e8"
         }
       }
     },
