@@ -66,10 +66,11 @@ jobs:
         run: |
           cd out
           mkdir package
-          # To add a new test kernel: extend KERNELS and add a matching
-          # `result-linux-<ver>` stage in the Dockerfile output stage; the
-          # gh-release upload below picks up tarballs by glob, so no further
-          # workflow changes are required.
+          # To add a new test kernel, extend KERNELS below and follow the
+          # `## Adding a new kernel version` recipe in pkg/linux/README.md
+          # (new src-/build-/result- Dockerfile stages, sysroots/linux-<ver>/deps,
+          # configs, cgmanifest refresh). The gh-release upload picks up
+          # tarballs by glob, so no further workflow changes are required.
           KERNELS="6.1"
           for arch in x86_64 aarch64; do
             tar cvzf "package/openvmm-deps.$arch.0.3.0-${{ github.run_number }}.tar.gz" \
