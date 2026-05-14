@@ -1,0 +1,4 @@
+# The Linux 6.1 (LTS) test kernel package
+
+LINUX_VERSION=6.1
+pkg/linux

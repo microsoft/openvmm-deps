@@ -2,7 +2,17 @@
 
 set -e
 
-config="$PKGDIR/$ARCH.config"
+if [ -z "$LINUX_VERSION" ]; then
+    >&2 echo "LINUX_VERSION must be set (e.g. via sysroots/linux-<ver>/deps)"
+    exit 1
+fi
+
+config="$PKGDIR/$LINUX_VERSION/$ARCH.config"
+
+if [ ! -f "$config" ]; then
+    >&2 echo "missing kernel config: $config"
+    exit 1
+fi
 
 mkdir -p "$SYSROOT/boot"
 
@@ -24,14 +34,12 @@ case $KARCH in
     *) >&2 echo "Unknown kernel architecture: $KARCH" && exit 1 ;;
 esac
 
-if [ -f "$config" ]; then
-    cp "$config" .config
-    make -j`nproc` -k -f $SRCDIR/Makefile ARCH="$KARCH" CROSS_COMPILE="$ARCH-linux-musl-" olddefconfig $KTARGETS
-    
-    for image in $KIMAGES; do
-        cp "$image" "$SYSROOT/boot/"
-    done
+cp "$config" .config
+make -j`nproc` -k -f $SRCDIR/Makefile ARCH="$KARCH" CROSS_COMPILE="$ARCH-linux-musl-" olddefconfig $KTARGETS
 
-    # Export the final config (after olddefconfig) so it can be extracted and committed.
-    cp .config "$SYSROOT/boot/config"
-fi
+for image in $KIMAGES; do
+    cp "$image" "$SYSROOT/boot/"
+done
+
+# Export the final config (after olddefconfig) so it can be extracted and committed.
+cp .config "$SYSROOT/boot/config"
