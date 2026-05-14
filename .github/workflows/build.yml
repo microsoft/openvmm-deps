@@ -75,6 +75,8 @@ jobs:
           for arch in x86_64 aarch64; do
             tar cvzf "package/openvmm-deps.$arch.0.3.0-${{ github.run_number }}.tar.gz" \
               -C "$arch/openvmm-deps" .
+            tar cvzf "package/openvmm-test-initrd.$arch.0.3.0-${{ github.run_number }}.tar.gz" \
+              -C "$arch/initrd" .
             for kver in $KERNELS; do
               tar cvzf "package/openvmm-test-linux-$kver.$arch.0.3.0-${{ github.run_number }}.tar.gz" \
                 -C "$arch/linux-$kver" .

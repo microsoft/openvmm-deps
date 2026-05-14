@@ -9,7 +9,9 @@ Today only **6.1** ships; additional lines (e.g. 6.6, 6.12) can be added
 purely additively (see "Adding a new kernel version" below). Each kernel
 is published as its own GitHub release artifact
 (`openvmm-test-linux-<version>.<arch>.<release>.tar.gz`) containing the
-kernel images, final config, and matching initrd.
+kernel images and final config. The initrd is shared across all kernels
+and ships as its own `openvmm-test-initrd.<arch>.<release>.tar.gz`
+artifact (so it isn't redundantly bundled into every kernel tarball).
 
 ## Layout
 

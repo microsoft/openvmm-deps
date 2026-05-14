@@ -23,7 +23,8 @@ to one GitHub release artifact:
 ```
 out/
   openvmm-deps/        sdk + dbgrd + shell + petritools sysroots
-  linux-6.1/           vmlinux, bzImage/Image, config, initrd
+  initrd/              shared busybox-based test rootfs (cpio.gz)
+  linux-6.1/           vmlinux, bzImage/Image, config (kernel only)
 ```
 
 The release pipeline packs each of these into its own tarball:
@@ -31,13 +32,16 @@ The release pipeline packs each of these into its own tarball:
 | Artifact                                              | Contents                              |
 | ----------------------------------------------------- | ------------------------------------- |
 | `openvmm-deps.<arch>.<ver>.tar.gz`                    | sdk + dbgrd + shell + petritools      |
-| `openvmm-test-linux-6.1.<arch>.<ver>.tar.gz`          | 6.1 LTS kernel + matching initrd      |
+| `openvmm-test-initrd.<arch>.<ver>.tar.gz`             | shared initrd (used with any kernel)  |
+| `openvmm-test-linux-6.1.<arch>.<ver>.tar.gz`          | 6.1 LTS kernel images + final config  |
 
 The `openvmm-deps` tarball no longer contains a kernel; consumers that
 need a Linux-direct boot kernel (e.g. petri's `Firmware::LinuxDirect`)
-should fetch the matching `openvmm-test-linux-<version>` artifact instead.
-Additional LTS kernel lines may be added as separate
-`openvmm-test-linux-<version>` artifacts in future releases.
+should fetch the matching `openvmm-test-linux-<version>` artifact for
+the kernel and `openvmm-test-initrd` for the userland (the same initrd
+is used with every kernel version). Additional LTS kernel lines may be
+added as separate `openvmm-test-linux-<version>` artifacts in future
+releases.
 
 For local testing, you can:
 - Copy `out/openvmm-deps/sysroot.tar.gz` to `<openvmm src>/.packages/openvmm-deps/`
