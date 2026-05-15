@@ -80,7 +80,7 @@ COPY --from=build-shell --link /out/sysroot.cpio.gz /shell.cpio.gz
 
 # Source repositories -- pinned by commit hash.
 # linux v6.1.172 (linux-6.1.y)
-FROM scratch AS src-linux
+FROM scratch AS src-linux-6.1
 ADD --link https://github.com/gregkh/linux.git#ad16b162f21d970235ced0c7e36e960c227317e8 /
 # llvm-project (release/17.x) -- used by libunwind and sdk
 FROM scratch AS src-llvm
@@ -116,13 +116,20 @@ RUN BUILD_CPIO=1 /pkg/Tools/build.sh sysroots/initrd
 FROM scratch AS result-initrd
 COPY --from=build-initrd --link /out/sysroot.cpio.gz /initrd
 
-# Build the Linux test package.
-FROM --platform=$BUILDPLATFORM package-builder AS build-linux
-RUN --mount=type=bind,from=src-linux,source=/,target=/pkg/linux/src \
-    /pkg/Tools/build.sh sysroots/linux
-FROM scratch AS result-linux
-COPY --from=build-linux --link /sysroot/boot /
-COPY --from=result-initrd --link / /
+# Build the Linux test kernels. One stage per kernel version; each stage
+# bind-mounts its pinned source and reads its config from
+# pkg/linux/<version>/<arch>.config (driven by $LINUX_VERSION exported via
+# sysroots/linux-<version>/deps). The kernel result contains only the
+# kernel images and final config; the initrd ships as its own artifact and
+# is shared across all kernel versions. To add a new kernel line, add a
+# matching `src-linux-<ver>` source stage above and a `build-linux-<ver>` /
+# `result-linux-<ver>` pair here, then add a `COPY --from=result-linux-<ver>`
+# line in the final `output` stage.
+FROM --platform=$BUILDPLATFORM package-builder AS build-linux-6.1
+RUN --mount=type=bind,from=src-linux-6.1,source=/,target=/pkg/linux/src \
+    /pkg/Tools/build.sh sysroots/linux-6.1
+FROM scratch AS result-linux-6.1
+COPY --from=build-linux-6.1 --link /sysroot/boot /
 
 FROM --platform=$BUILDPLATFORM package-builder AS result-libunwind
 RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
@@ -139,10 +146,15 @@ RUN BUILD_EROFS=1 /pkg/Tools/build.sh sysroots/petritools
 FROM scratch AS result-petritools
 COPY --from=build-petritools --link /out/sysroot.erofs /petritools.erofs
 
-# Build the output.
+# Build the output. The release workflow packs each top-level subdirectory
+# into its own GitHub release artifact:
+#   openvmm-deps/  -> openvmm-deps.<arch>.<release>.tar.gz
+#   initrd/        -> openvmm-test-initrd.<arch>.<release>.tar.gz
+#   linux-<kver>/  -> openvmm-test-linux-<kver>.<arch>.<release>.tar.gz
 FROM scratch AS output
-COPY --from=result-dbgrd --link / /
-COPY --from=result-shell --link / /
-COPY --from=result-sdk --link / /
-COPY --from=result-linux --link / /
-COPY --from=result-petritools --link / /
+COPY --from=result-dbgrd      --link / /openvmm-deps/
+COPY --from=result-shell      --link / /openvmm-deps/
+COPY --from=result-sdk        --link / /openvmm-deps/
+COPY --from=result-petritools --link / /openvmm-deps/
+COPY --from=result-initrd     --link /initrd /initrd/initrd
+COPY --from=result-linux-6.1  --link / /linux-6.1/

@@ -23,6 +23,7 @@ jobs:
 
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - architecture: aarch64
@@ -65,17 +66,30 @@ jobs:
         run: |
           cd out
           mkdir package
-          tar cvzf "package/openvmm-deps.x86_64.0.2.0-${{ github.run_number }}.tar.gz" -C x86_64 .
-          tar cvzf "package/openvmm-deps.aarch64.0.2.0-${{ github.run_number }}.tar.gz" -C aarch64 .
+          # To add a new test kernel, extend KERNELS below and follow the
+          # `## Adding a new kernel version` recipe in pkg/linux/README.md
+          # (new src-/build-/result- Dockerfile stages, sysroots/linux-<ver>/deps,
+          # configs, cgmanifest refresh). The gh-release upload picks up
+          # tarballs by glob, so no further workflow changes are required.
+          KERNELS="6.1"
+          for arch in x86_64 aarch64; do
+            tar cvzf "package/openvmm-deps.$arch.0.3.0-${{ github.run_number }}.tar.gz" \
+              -C "$arch/openvmm-deps" .
+            tar cvzf "package/openvmm-test-initrd.$arch.0.3.0-${{ github.run_number }}.tar.gz" \
+              -C "$arch/initrd" .
+            for kver in $KERNELS; do
+              tar cvzf "package/openvmm-test-linux-$kver.$arch.0.3.0-${{ github.run_number }}.tar.gz" \
+                -C "$arch/linux-$kver" .
+            done
+          done
 
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: "0.2.0-${{ github.run_number }}"
+          VERSION: "0.3.0-${{ github.run_number }}"
         run: |
           gh release create "$VERSION" \
             --title "$VERSION" \
             --generate-notes \
             --repo "$GITHUB_REPOSITORY" \
-            "out/package/openvmm-deps.x86_64.$VERSION.tar.gz" \
-            "out/package/openvmm-deps.aarch64.$VERSION.tar.gz"
+            out/package/*.tar.gz
