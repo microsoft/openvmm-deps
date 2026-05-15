@@ -46,11 +46,11 @@ and produces toolchain-dependent noise in the diff).
 
    ```bash
    # For x86_64 / 6.1:
-   docker build --platform x86_64 --target result-linux-6.1 \
+   docker build --platform linux/amd64 --target result-linux-6.1 \
      --output type=local,dest=out/linux-6.1 -f Dockerfile .
 
    # For aarch64 / 6.1:
-   docker build --platform aarch64 --target result-linux-6.1 \
+   docker build --platform linux/arm64 --target result-linux-6.1 \
      --output type=local,dest=out/linux-6.1 -f Dockerfile .
    ```
 
