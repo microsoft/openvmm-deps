@@ -25,6 +25,7 @@ out/
   openvmm-deps/        sdk + dbgrd + shell + petritools sysroots
   initrd/              shared busybox-based test rootfs (cpio.gz)
   linux-6.1/           vmlinux, bzImage/Image, config (kernel only)
+  linux-6.18/          vmlinux, bzImage/Image, config (kernel only)
 ```
 
 The release pipeline packs each of these into its own tarball:
@@ -34,12 +35,13 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-deps.<arch>.<ver>.tar.gz`                    | sdk + dbgrd + shell + petritools      |
 | `openvmm-test-initrd.<arch>.<ver>.tar.gz`             | shared initrd (used with any kernel)  |
 | `openvmm-test-linux-6.1.<arch>.<ver>.tar.gz`          | 6.1 LTS kernel images + final config  |
+| `openvmm-test-linux-6.18.<arch>.<ver>.tar.gz`         | 6.18 kernel images + final config     |
 
 The `openvmm-deps` tarball no longer contains a kernel; consumers that
 need a Linux-direct boot kernel (e.g. petri's `Firmware::LinuxDirect`)
 should fetch the matching `openvmm-test-linux-<version>` artifact for
 the kernel and `openvmm-test-initrd` for the userland (the same initrd
-is used with every kernel version). Additional LTS kernel lines may be
+is used with every kernel version). Additional kernel lines may be
 added as separate `openvmm-test-linux-<version>` artifacts in future
 releases.
 

@@ -71,7 +71,7 @@ jobs:
           # (new src-/build-/result- Dockerfile stages, sysroots/linux-<ver>/deps,
           # configs, cgmanifest refresh). The gh-release upload picks up
           # tarballs by glob, so no further workflow changes are required.
-          KERNELS="6.1"
+          KERNELS="6.1 6.18"
           for arch in x86_64 aarch64; do
             tar cvzf "package/openvmm-deps.$arch.0.3.0-${{ github.run_number }}.tar.gz" \
               -C "$arch/openvmm-deps" .
