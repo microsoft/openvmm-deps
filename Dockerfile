@@ -82,6 +82,9 @@ COPY --from=build-shell --link /out/sysroot.cpio.gz /shell.cpio.gz
 # linux v6.1.172 (linux-6.1.y)
 FROM scratch AS src-linux-6.1
 ADD --link https://github.com/gregkh/linux.git#ad16b162f21d970235ced0c7e36e960c227317e8 /
+# linux v6.18.31 (linux-6.18.y)
+FROM scratch AS src-linux-6.18
+ADD --link https://github.com/gregkh/linux.git#6c1de6e6aa8cf45b3b3dba510ad0f72df7c61618 /
 # llvm-project (release/17.x) -- used by libunwind and sdk
 FROM scratch AS src-llvm
 ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb6a803753fe18 /
@@ -131,6 +134,12 @@ RUN --mount=type=bind,from=src-linux-6.1,source=/,target=/pkg/linux/src \
 FROM scratch AS result-linux-6.1
 COPY --from=build-linux-6.1 --link /sysroot/boot /
 
+FROM --platform=$BUILDPLATFORM package-builder AS build-linux-6.18
+RUN --mount=type=bind,from=src-linux-6.18,source=/,target=/pkg/linux/src \
+    /pkg/Tools/build.sh sysroots/linux-6.18
+FROM scratch AS result-linux-6.18
+COPY --from=build-linux-6.18 --link /sysroot/boot /
+
 FROM --platform=$BUILDPLATFORM package-builder AS result-libunwind
 RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
     /pkg/Tools/build.sh pkg/libunwind
@@ -158,3 +167,4 @@ COPY --from=result-sdk        --link / /openvmm-deps/
 COPY --from=result-petritools --link / /openvmm-deps/
 COPY --from=result-initrd     --link /initrd /initrd/initrd
 COPY --from=result-linux-6.1  --link / /linux-6.1/
+COPY --from=result-linux-6.18 --link / /linux-6.18/

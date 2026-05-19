@@ -120,6 +120,15 @@
       "component": {
         "type": "git",
         "git": {
+          "repositoryUrl": "https://github.com/gregkh/linux",
+          "commitHash": "6c1de6e6aa8cf45b3b3dba510ad0f72df7c61618"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
           "repositoryUrl": "https://github.com/llvm/llvm-project",
           "commitHash": "6009708b4367171ccdbf4b5905cb6a803753fe18"
         }

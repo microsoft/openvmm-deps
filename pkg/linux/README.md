@@ -4,8 +4,8 @@ This directory contains the kernel configs and build script for the OpenVMM
 test kernels. These kernels are used by the petri test framework with Linux
 direct boot (`Firmware::LinuxDirect`).
 
-The build is structured to support multiple LTS kernel lines side-by-side.
-Today only **6.1** ships; additional lines (e.g. 6.6, 6.12) can be added
+The build is structured to support multiple kernel lines side-by-side.
+Today **6.1** (LTS) and **6.18** ship; additional lines can be added
 purely additively (see "Adding a new kernel version" below). Each kernel
 is published as its own GitHub release artifact
 (`openvmm-test-linux-<version>.<arch>.<release>.tar.gz`) containing the
@@ -22,6 +22,9 @@ pkg/linux/
   6.1/
     x86_64.config         # Kernel config for 6.1 / x86_64
     aarch64.config        # Kernel config for 6.1 / aarch64
+  6.18/
+    x86_64.config         # Kernel config for 6.18 / x86_64
+    aarch64.config        # Kernel config for 6.18 / aarch64
 ```
 
 The version selection is driven by `$LINUX_VERSION`, which is exported by

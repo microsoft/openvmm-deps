@@ -1,0 +1,4 @@
+# The Linux 6.18 test kernel package
+
+LINUX_VERSION=6.18
+pkg/linux
