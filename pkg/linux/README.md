@@ -24,6 +24,16 @@ like `gdb`, `crash`, and `drgn` will automatically pick up
 The bootable image (`bzImage` / `Image`) never carries DWARF and is
 unaffected.
 
+Note that a local `docker build --output ...` lands `vmlinux` and
+`vmlinux.debug` in *sibling* directories (`out/linux-<ver>/` and
+`out/linux-<ver>-debug/`), so the `.gnu_debuglink` auto-load won't fire
+out of the box. Either copy/symlink `vmlinux.debug` next to `vmlinux`
+before invoking your debugger, or point the debugger at the debug
+directory explicitly (for `gdb`: `set debug-file-directory
+out/linux-<ver>-debug`). The release tarballs are designed to be
+extracted into the same directory, in which case auto-load works
+unchanged.
+
 The debug info is `zlib`-compressed inside `vmlinux.debug` to keep the
 artifact small. If you change the compression choice, note that the
 bundled cross toolchain (binutils 2.33.1 / GCC 11.5.0) supports `zlib`
