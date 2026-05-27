@@ -13,6 +13,23 @@ kernel images and final config. The initrd is shared across all kernels
 and ships as its own `openvmm-test-initrd.<arch>.<release>.tar.gz`
 artifact (so it isn't redundantly bundled into every kernel tarball).
 
+`vmlinux` ships stripped (so the kernel artifact stays small), and the
+matching DWARF5 symbols are split into a separate `vmlinux.debug` file
+that's published as its own
+`openvmm-test-linux-<version>-debug.<arch>.<release>.tar.gz` artifact.
+Consumers that don't need symbols don't have to download them. Tools
+like `gdb`, `crash`, and `drgn` will automatically pick up
+`vmlinux.debug` when both files are extracted into the same directory
+(the link is recorded via `objcopy --add-gnu-debuglink` in `build.sh`).
+The bootable image (`bzImage` / `Image`) never carries DWARF and is
+unaffected.
+
+The debug info is `zlib`-compressed inside `vmlinux.debug` to keep the
+artifact small. If you change the compression choice, note that the
+bundled cross toolchain (binutils 2.33.1 / GCC 11.5.0) supports `zlib`
+but not `zstd`; `CONFIG_DEBUG_INFO_COMPRESSED_ZSTD` would be silently
+dropped by `olddefconfig`.
+
 ## Layout
 
 ```
@@ -115,9 +132,10 @@ If you prefer to build locally (e.g., for a quick iteration on one combo):
 1. Look up the latest commit on the desired LTS branch in
    `gregkh/linux` (e.g. `linux-6.12.y`).
 2. In `Dockerfile`, add a new `src-linux-<ver>` stage pinning that commit,
-   and a `build-linux-<ver>` / `result-linux-<ver>` pair modeled on the
-   existing 6.1 ones. Add a corresponding `COPY --from=result-linux-<ver>`
-   line in the final `output` stage.
+   and a `build-linux-<ver>` / `result-linux-<ver>` /
+   `result-linux-<ver>-debug` triple modeled on the existing 6.1 ones.
+   Add corresponding `COPY --from=result-linux-<ver>` and
+   `COPY --from=result-linux-<ver>-debug` lines in the final `output` stage.
 3. Create `sysroots/linux-<ver>/deps` containing
    `LINUX_VERSION=<ver>` and `pkg/linux`.
 4. Seed `pkg/linux/<ver>/{x86_64,aarch64}.config` by copying from the
