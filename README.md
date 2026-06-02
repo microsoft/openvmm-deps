@@ -36,6 +36,7 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-test-initrd.<arch>.<ver>.tar.gz`             | shared initrd (used with any kernel)  |
 | `openvmm-test-linux-6.1.<arch>.<ver>.tar.gz`          | 6.1 LTS kernel images + final config  |
 | `openvmm-test-linux-6.18.<arch>.<ver>.tar.gz`         | 6.18 kernel images + final config     |
+| `openvmm-test-virtio-win.<ver>.tar.gz`                | virtio-win NetKVM drivers (all OS/arch)|
 
 The `openvmm-deps` tarball no longer contains a kernel; consumers that
 need a Linux-direct boot kernel (e.g. petri's `Firmware::LinuxDirect`)
@@ -56,3 +57,24 @@ To build only one target (e.g. just a kernel) use `--target`:
 docker build --platform x86_64 --target result-linux-6.1 \
   --output type=local,dest=out/linux-6.1 .
 ```
+
+## virtio-win drivers
+
+A separate `Dockerfile.virtio-win` extracts Windows virtio drivers from
+the [virtio-win](https://github.com/virtio-win/virtio-win-pkg-scripts)
+ISO. This build is architecture-independent (the ISO contains Windows PE
+binaries for multiple guest architectures) and runs separately from the
+main cross-compilation pipeline.
+
+```bash
+docker build -f Dockerfile.virtio-win --output type=local,dest=out .
+```
+
+The output preserves the ISO's directory layout (e.g.
+`NetKVM/2k22/amd64/`, `NetKVM/2k25/ARM64/`). Currently only NetKVM
+drivers are extracted; to add more driver families, extend the `grep`
+filter in `Dockerfile.virtio-win`.
+
+The ISO is mirrored to the
+[`virtio-iso-v1`](https://github.com/microsoft/openvmm-deps/releases/tag/virtio-iso-v1)
+GitHub release, pinned by sha256 checksum.
