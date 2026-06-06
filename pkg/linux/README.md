@@ -18,6 +18,7 @@ artifact (so it isn't redundantly bundled into every kernel tarball).
 ```
 pkg/linux/
   build.sh                # Shared build script. Reads $LINUX_VERSION.
+  sync-configs-from-ci.sh # Pull resolved configs from CI artifacts.
   README.md               # This file.
   6.1/
     x86_64.config         # Kernel config for 6.1 / x86_64
@@ -41,6 +42,38 @@ cross-compiler toolchain. To ensure the committed config exactly matches
 what the build uses, always extract the final config from the build output
 rather than running `olddefconfig` locally (which uses your host compiler
 and produces toolchain-dependent noise in the diff).
+
+### Via CI (recommended)
+
+The easiest way to update configs across all architectures and kernel
+versions at once is to let CI do the build and then pull the resolved
+configs back:
+
+1. Edit the config file(s) directly (e.g., change `# CONFIG_FOO is not set`
+   to `CONFIG_FOO=y`) under `pkg/linux/<version>/`.
+
+2. Commit, push your branch, and wait for the CI build to complete.
+
+3. Run the sync script to download the final configs from the CI artifacts:
+
+   ```bash
+   # Uses the latest CI run for the current branch:
+   pkg/linux/sync-configs-from-ci.sh
+
+   # Or specify a run ID:
+   pkg/linux/sync-configs-from-ci.sh 12345
+   ```
+
+4. Review the resolved changes and push:
+
+   ```bash
+   git diff pkg/linux/
+   git add pkg/linux/ && git commit -m "sync resolved kernel configs from CI" && git push
+   ```
+
+### Locally (single arch/version)
+
+If you prefer to build locally (e.g., for a quick iteration on one combo):
 
 1. Edit the config file directly (e.g., change `# CONFIG_FOO is not set` to
    `CONFIG_FOO=y`) under `pkg/linux/<version>/`.
