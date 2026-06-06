@@ -101,6 +101,8 @@ jobs:
               tar cvzf "package/openvmm-test-linux-$kver.$arch.$VERSION.tar.gz" \
                 -C "$arch/linux-$kver" .
             done
+            tar cvzf "package/qemu-linux-static.$arch.0.3.0-${{ github.run_number }}.tar.gz" \
+              -C "$arch/qemu" .
           done
           # virtio-win is arch-independent (Windows PE binaries).
           tar cvzf "package/openvmm-test-virtio-win.$VERSION.tar.gz" \

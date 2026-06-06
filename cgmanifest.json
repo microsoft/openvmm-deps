@@ -155,6 +155,15 @@
     },
     {
       "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/qemu/qemu",
+          "commitHash": "6e9a825c1d4e7b62d072e99a89ecd1a74c7f0d55"
+        }
+      }
+    },
+    {
+      "component": {
         "type": "other",
         "other": {
           "name": "virtio-win",

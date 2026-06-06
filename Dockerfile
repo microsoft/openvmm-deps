@@ -95,6 +95,9 @@ ADD --link https://github.com/openssl/openssl.git#27315a978e280a20c7f3ea0bfe05f6
 # SymCrypt requires git metadata during its build
 FROM scratch AS src-symcrypt
 ADD --keep-git-dir=true --link https://github.com/microsoft/symcrypt.git#748c20f1fc486beca1a2679ed06492712cfdc950 /
+# qemu (v11.0.1)
+FROM scratch AS src-qemu
+ADD --keep-git-dir=true --link https://github.com/qemu/qemu.git#6e9a825c1d4e7b62d072e99a89ecd1a74c7f0d55 /
 
 # Build the sdk.
 #
@@ -155,6 +158,19 @@ RUN BUILD_EROFS=1 /pkg/Tools/build.sh sysroots/petritools
 FROM scratch AS result-petritools
 COPY --from=build-petritools --link /out/sysroot.erofs /petritools.erofs
 
+# Build QEMU (statically linked, TCG only).
+# Uses Ubuntu for multiarch cross-compilation support.
+FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS build-qemu
+ARG TARGETARCH
+ENV TARGETARCH=$TARGETARCH
+COPY --link pkg/qemu/deps.sh /pkg/qemu/deps.sh
+RUN /pkg/qemu/deps.sh
+COPY --link pkg/qemu /pkg/qemu
+RUN --mount=type=bind,from=src-qemu,source=/,target=/pkg/qemu/src,rw \
+    cd /pkg/qemu/src && /pkg/qemu/patch.sh && /pkg/qemu/build.sh
+FROM scratch AS result-qemu
+COPY --from=build-qemu --link /out/ /
+
 # Build the output. The release workflow packs each top-level subdirectory
 # into its own GitHub release artifact:
 #   openvmm-deps/  -> openvmm-deps.<arch>.<release>.tar.gz
@@ -168,3 +184,4 @@ COPY --from=result-petritools --link / /openvmm-deps/
 COPY --from=result-initrd     --link /initrd /initrd/initrd
 COPY --from=result-linux-6.1  --link / /linux-6.1/
 COPY --from=result-linux-6.18 --link / /linux-6.18/
+COPY --from=result-qemu       --link / /qemu/
