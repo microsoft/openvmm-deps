@@ -97,7 +97,7 @@ FROM scratch AS src-symcrypt
 ADD --keep-git-dir=true --link https://github.com/microsoft/symcrypt.git#748c20f1fc486beca1a2679ed06492712cfdc950 /
 # qemu (v11.0.1)
 FROM scratch AS src-qemu
-ADD --keep-git-dir=true --link https://github.com/qemu/qemu.git#6e9a825c1d4e7b62d072e99a89ecd1a74c7f0d55 /
+ADD --checksum=sha256:b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39 --link https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz /
 
 # Build the sdk.
 #
@@ -166,7 +166,7 @@ ENV TARGETARCH=$TARGETARCH
 COPY --link pkg/qemu/deps.sh /pkg/qemu/deps.sh
 RUN /pkg/qemu/deps.sh
 COPY --link pkg/qemu /pkg/qemu
-RUN --mount=type=bind,from=src-qemu,source=/,target=/pkg/qemu/src,rw \
+RUN --mount=type=bind,from=src-qemu,source=/qemu-11.0.1,target=/pkg/qemu/src,rw \
     cd /pkg/qemu/src && /pkg/qemu/patch.sh && /pkg/qemu/build.sh
 FROM scratch AS result-qemu
 COPY --from=build-qemu --link /out/ /

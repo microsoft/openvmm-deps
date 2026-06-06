@@ -32,11 +32,11 @@ if [ "$CROSS_ARCH" != "$HOST_ARCH" ]; then
     if [ "$HOST_ARCH" = "amd64" ]; then
         CROSS_GCC=gcc-aarch64-linux-gnu
         CROSS_LIBC=libc6-dev-arm64-cross
-        PORTS_URI=http://ports.ubuntu.com/
+        PORTS_URI=https://ports.ubuntu.com/
     else
         CROSS_GCC=gcc-x86-64-linux-gnu
         CROSS_LIBC=libc6-dev-amd64-cross
-        PORTS_URI=http://archive.ubuntu.com/ubuntu
+        PORTS_URI=https://archive.ubuntu.com/ubuntu
     fi
 
     sed -i "/^Types:/a Architectures: $HOST_ARCH" /etc/apt/sources.list.d/ubuntu.sources

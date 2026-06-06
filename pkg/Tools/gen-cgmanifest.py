@@ -94,7 +94,15 @@ for line in text.splitlines():
         url = upstream or u.group(0)
         fname = url.rsplit("/", 1)[-1].split("?")[0]
         nv = re.match(r"(.+?)-(\d[\w.-]*)\.(?:tar\.\w+|iso)$", fname)
-        name, version = (nv.group(1), nv.group(2)) if nv else (fname or "unknown", "0")
+        if not nv:
+            # Try GitHub archive URLs: .../qemu/archive/refs/tags/v11.0.1.tar.gz
+            # Extract name from the repo path and version from the tag.
+            if m2 := re.match(r"https?://github\.com/([^/]+/([^/]+))/archive/refs/tags/v?([\w.-]+)\.tar\.gz$", url):
+                name, version = m2.group(2), m2.group(3)
+            else:
+                name, version = fname or "unknown", "0"
+        else:
+            name, version = nv.group(1), nv.group(2)
         reg = {"component": {"type": "other", "other": {
             "name": name, "version": version,
             "downloadUrl": url, "hash": sha}}}

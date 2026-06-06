@@ -155,10 +155,12 @@
     },
     {
       "component": {
-        "type": "git",
-        "git": {
-          "repositoryUrl": "https://github.com/qemu/qemu",
-          "commitHash": "6e9a825c1d4e7b62d072e99a89ecd1a74c7f0d55"
+        "type": "other",
+        "other": {
+          "name": "qemu",
+          "version": "11.0.1",
+          "downloadUrl": "https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz",
+          "hash": "b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39"
         }
       }
     },
