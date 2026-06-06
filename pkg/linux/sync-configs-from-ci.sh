@@ -22,7 +22,7 @@ if [ -z "$run_id" ]; then
     branch="$(git rev-parse --abbrev-ref HEAD)"
     echo "Looking up latest CI run for branch '$branch'..."
     run_id="$(gh run list --workflow=build.yml --branch="$branch" --limit=1 --json databaseId --jq '.[0].databaseId')"
-    if [ -z "$run_id" ]; then
+    if [ -z "$run_id" ] || [ "$run_id" = "null" ]; then
         echo >&2 "No CI runs found for branch '$branch'."
         exit 1
     fi
