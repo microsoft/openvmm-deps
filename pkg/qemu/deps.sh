@@ -6,6 +6,9 @@ set -e
 
 export DEBIAN_FRONTEND=noninteractive
 
+HOST_ARCH=$(dpkg --print-architecture)
+CROSS_ARCH="${TARGETARCH:-$HOST_ARCH}"
+
 PACKAGES="
     gcc
     make
@@ -13,17 +16,14 @@ PACKAGES="
     python3
     python3-venv
     pkg-config
-    libglib2.0-dev
-    zlib1g-dev
+    libglib2.0-dev:$CROSS_ARCH
+    zlib1g-dev:$CROSS_ARCH
     flex
     bison
     git
     ca-certificates
     patch
 "
-
-HOST_ARCH=$(dpkg --print-architecture)
-CROSS_ARCH="${TARGETARCH:-$HOST_ARCH}"
 
 if [ "$CROSS_ARCH" != "$HOST_ARCH" ]; then
     dpkg --add-architecture "$CROSS_ARCH"
@@ -50,12 +50,7 @@ Architectures: $CROSS_ARCH
 Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 EOF
 
-    PACKAGES="$PACKAGES
-        $CROSS_GCC
-        $CROSS_LIBC
-        libglib2.0-dev:$CROSS_ARCH
-        zlib1g-dev:$CROSS_ARCH
-    "
+    PACKAGES="$PACKAGES $CROSS_GCC $CROSS_LIBC"
 fi
 
 apt-get update
