@@ -21,7 +21,6 @@ PACKAGES="
     flex
     bison
     git
-    ca-certificates
     patch
 "
 
@@ -51,6 +50,8 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 EOF
 
     PACKAGES="$PACKAGES $CROSS_GCC $CROSS_LIBC"
+    apt-get update
+    apt-get install -y ca-certificates
 fi
 
 apt-get update
