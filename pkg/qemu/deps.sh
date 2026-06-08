@@ -19,6 +19,7 @@ PACKAGES="
     bison
     git
     ca-certificates
+    patch
 "
 
 HOST_ARCH=$(dpkg --print-architecture)
