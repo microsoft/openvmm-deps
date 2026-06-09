@@ -149,7 +149,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://github.com/microsoft/symcrypt",
-          "commitHash": "748c20f1fc486beca1a2679ed06492712cfdc950"
+          "commitHash": "cc7902403ec3e53df9cd0f25f5775c762ca7ccb5"
         }
       }
     },
