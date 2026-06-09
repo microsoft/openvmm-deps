@@ -91,10 +91,10 @@ ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb
 # openssl (~3.2.0-dev)
 FROM scratch AS src-openssl
 ADD --link https://github.com/openssl/openssl.git#27315a978e280a20c7f3ea0bfe05f6c186137625 /
-# symcrypt (v103.11.0)
+# symcrypt (v103.13.0-dev)
 # SymCrypt requires git metadata during its build
 FROM scratch AS src-symcrypt
-ADD --keep-git-dir=true --link https://github.com/microsoft/symcrypt.git#748c20f1fc486beca1a2679ed06492712cfdc950 /
+ADD --keep-git-dir=true --link https://github.com/microsoft/symcrypt.git#cc7902403ec3e53df9cd0f25f5775c762ca7ccb5 /
 
 # Build the sdk.
 #
