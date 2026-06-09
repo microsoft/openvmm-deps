@@ -16,15 +16,19 @@ PACKAGES="
     python3
     python3-venv
     pkg-config
+    libglib2.0-dev:$HOST_ARCH
     libglib2.0-dev:$CROSS_ARCH
     zlib1g-dev:$CROSS_ARCH
     flex
     bison
     git
     patch
+
 "
 
 if [ "$CROSS_ARCH" != "$HOST_ARCH" ]; then
+    apt-get update
+    apt-get install -y ca-certificates
     dpkg --add-architecture "$CROSS_ARCH"
 
     # On Ubuntu, non-native architectures need the ports mirror.
@@ -50,8 +54,6 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 EOF
 
     PACKAGES="$PACKAGES $CROSS_GCC $CROSS_LIBC"
-    apt-get update
-    apt-get install -y ca-certificates
 fi
 
 apt-get update
