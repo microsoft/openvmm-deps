@@ -1,0 +1,34 @@
+From: John Starks <jostarks@microsoft.com>
+Date: Wed, 4 Jun 2026 00:00:00 +0000
+Subject: [PATCH] hw/arm/smmuv3: Advertise FWB capability in IDR3
+
+Set the FWB (Force Write-Back) bit in IDR3 when stage-2 translation
+is supported. FWB allows stage-2 page tables to override stage-1
+memory type and cacheability attributes, forcing write-back
+cacheability on stage-1 output.
+
+The Linux kernel requires FWB support for iommufd nested translation.
+Without this bit, the kernel refuses to enable nesting on the
+emulated SMMUv3.
+
+This is just useful for testing purposes and probably should not
+be included upstream without additional thought.
+---
+ hw/arm/smmuv3.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/hw/arm/smmuv3.c b/hw/arm/smmuv3.c
+index 5c2855c377..cf6c1495c7 100644
+--- a/hw/arm/smmuv3.c
++++ b/hw/arm/smmuv3.c
+@@ -304,6 +304,9 @@ static void smmuv3_init_id_regs(SMMUv3State *s)
+     if (FIELD_EX32(s->idr[0], IDR0, S2P)) {
+         /* XNX is a stage-2-specific feature */
+         s->idr[3] = FIELD_DP32(s->idr[3], IDR3, XNX, 1);
++        /* FWB: S2 can force write-back cacheability on S1 output.
++         * Required by the Linux kernel for iommufd nested translation. */
++        s->idr[3] = FIELD_DP32(s->idr[3], IDR3, FWB, 1);
+     }
+     s->idr[3] = FIELD_DP32(s->idr[3], IDR3, RIL, 1);
+     s->idr[3] = FIELD_DP32(s->idr[3], IDR3, BBML, 2);
+-- 
