@@ -26,6 +26,7 @@ out/
   initrd/              shared busybox-based test rootfs (cpio.gz)
   linux-6.1/           vmlinux, bzImage/Image, config (kernel only)
   linux-6.18/          vmlinux, bzImage/Image, config (kernel only)
+  qemu/                qemu-system-aarch64, qemu-system-x86_64
 ```
 
 The release pipeline packs each of these into its own tarball:
@@ -37,6 +38,7 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-test-linux-6.1.<arch>.<ver>.tar.gz`          | 6.1 LTS kernel images + final config  |
 | `openvmm-test-linux-6.18.<arch>.<ver>.tar.gz`         | 6.18 kernel images + final config     |
 | `openvmm-test-virtio-win.<ver>.tar.gz`                | virtio-win NetKVM drivers (all OS/arch)|
+| `qemu-linux-static.<arch>.<ver>.tar.gz`                | static QEMU system emulators (TCG)    |
 
 The `openvmm-deps` tarball no longer contains a kernel; consumers that
 need a Linux-direct boot kernel (e.g. petri's `Firmware::LinuxDirect`)

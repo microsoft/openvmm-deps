@@ -157,6 +157,17 @@
       "component": {
         "type": "other",
         "other": {
+          "name": "qemu",
+          "version": "11.0.1",
+          "downloadUrl": "https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz",
+          "hash": "b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "other",
+        "other": {
           "name": "virtio-win",
           "version": "0.1.285",
           "downloadUrl": "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.285-1/virtio-win-0.1.285.iso",
