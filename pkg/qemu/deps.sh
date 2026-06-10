@@ -19,6 +19,7 @@ PACKAGES="
     libglib2.0-dev:$HOST_ARCH
     libglib2.0-dev:$CROSS_ARCH
     zlib1g-dev:$CROSS_ARCH
+    libattr1-dev:$CROSS_ARCH
     flex
     bison
     git
