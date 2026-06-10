@@ -33,6 +33,7 @@ cd "$BUILDDIR"
     --enable-tcg \
     --enable-fdt=internal \
     --enable-slirp \
+    --enable-virtfs \
     --disable-pixman \
     --disable-docs \
     --disable-install-blobs \
