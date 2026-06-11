@@ -40,7 +40,7 @@ util-linux
 tdnf install -y $packages
 
 RUSTUP_VERSION="1.29.0"
-RUST_TOOLCHAIN="1.96.0"
+RUST_TOOLCHAIN="1.95.0"
 
 case "$(uname -m)" in
     x86_64)
