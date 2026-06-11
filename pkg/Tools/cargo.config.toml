@@ -1,0 +1,13 @@
+[env]
+# cc-rs picks per-target CC/AR env vars.
+CC_x86_64_unknown_linux_musl  = "x86_64-linux-musl-gcc"
+AR_x86_64_unknown_linux_musl  = "x86_64-linux-musl-ar"
+CC_aarch64_unknown_linux_musl = "aarch64-linux-musl-gcc"
+AR_aarch64_unknown_linux_musl = "aarch64-linux-musl-ar"
+
+# Point openssl-sys at the openssl built by pkg/openssl3 (already
+# installed into $SYSROOT, which is /sysroot in the package-builder
+# image) instead of letting it pull in a vendored copy.
+OPENSSL_DIR       = "/sysroot"
+OPENSSL_NO_VENDOR = "1"
+OPENSSL_STATIC    = "1"

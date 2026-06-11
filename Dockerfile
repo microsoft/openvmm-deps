@@ -52,7 +52,7 @@ COPY pkg/Tools/deps.sh /pkg/Tools/
 RUN /pkg/Tools/deps.sh
 COPY --link pkg /pkg
 COPY --link sysroots /sysroots
-ENV PATH="${PATH}:/opt/cross/bin"
+ENV PATH="${PATH}:/opt/cross/bin:/root/.cargo/bin"
 ENV SYSROOT="/sysroot"
 ARG TARGETARCH
 ENV TARGETARCH=$TARGETARCH
@@ -95,6 +95,12 @@ ADD --link https://github.com/openssl/openssl.git#27315a978e280a20c7f3ea0bfe05f6
 # SymCrypt requires git metadata during its build
 FROM scratch AS src-symcrypt
 ADD --keep-git-dir=true --link https://github.com/microsoft/symcrypt.git#cc7902403ec3e53df9cd0f25f5775c762ca7ccb5 /
+# ms-tpm-20-ref-rs (pinned by commit)
+FROM scratch AS src-ms-tpm-20-ref-rs
+ADD --link https://github.com/microsoft/ms-tpm-20-ref-rs.git#e0bba1e46d9cdc8630f3693e5e91f8a3be4fad7b /
+# ms-tpm-20-ref (pinned by commit)
+FROM scratch AS src-ms-tpm-20-ref
+ADD --link https://github.com/microsoft/ms-tpm-20-ref.git#2d5660ac249293dcbaed192c70ca208d321ebf5b /
 # qemu (v11.0.1)
 FROM scratch AS src-qemu
 ADD --unpack --checksum=sha256:b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39 --link https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz /
@@ -108,6 +114,8 @@ RUN ln -s /opt/cross/*-linux-musl /sysroot
 RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
     --mount=type=bind,from=src-openssl,source=/,target=/pkg/openssl3/src,rw \
     --mount=type=bind,from=src-symcrypt,source=/,target=/pkg/symcrypt/src,rw \
+    --mount=type=bind,from=src-ms-tpm-20-ref-rs,source=/,target=/pkg/ms_tpm_20_ref/src,rw \
+    --mount=type=bind,from=src-ms-tpm-20-ref,source=/,target=/pkg/ms_tpm_20_ref/src/ms-tpm-20-ref,rw \
     /pkg/Tools/build.sh sysroots/sdk
 FROM scratch AS result-sdk
 COPY --from=build-sdk --link /out/sysroot.tar.gz /sysroot.tar.gz
