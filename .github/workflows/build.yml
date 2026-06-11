@@ -34,6 +34,9 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+
       - name: Set up QEMU
         if: matrix.architecture == 'aarch64'
         uses: docker/setup-qemu-action@v3
