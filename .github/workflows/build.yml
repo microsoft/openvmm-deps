@@ -25,10 +25,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - architecture: aarch64
-          - architecture: x86_64
-    runs-on: ubuntu-latest
+        architecture: [aarch64, x86_64]
+    runs-on:
+      - self-hosted
+      - 1ES.Pool=openvmm-deps-gh-amd-westus2
+      - 1ES.ImageOverride=ubuntu2404-amd64-docker
+      - JobId=build-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -45,7 +50,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build ${{ matrix.architecture }} outputs
-        run: docker build --platform "${{ matrix.architecture }}" --output type=local,dest=out .
+        run: docker buildx build --platform "${{ matrix.architecture }}" --output type=local,dest=out .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
