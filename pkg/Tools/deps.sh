@@ -44,12 +44,12 @@ RUST_TOOLCHAIN="1.95.0"
 
 case "$(uname -m)" in
     x86_64)
-        rustup_arch="x86_64-unknown-linux-musl"
-        rustup_init_sha256="9cd3fda5fd293890e36ab271af6a786ee22084b5f6c2b83fd8323cec6f0992c1"
+        rustup_arch="x86_64-unknown-linux-gnu"
+        rustup_init_sha256="4acc9acc76d5079515b46346a485974457b5a79893cfb01112423c89aeb5aa10"
         ;;
     aarch64)
-        rustup_arch="aarch64-unknown-linux-musl"
-        rustup_init_sha256="88761caacddb92cd79b0b1f939f3990ba1997d701a38b3e8dd6746a562f2a759"
+        rustup_arch="aarch64-unknown-linux-gnu"
+        rustup_init_sha256="9732d6c5e2a098d3521fca8145d826ae0aaa067ef2385ead08e6feac88fa5792"
         ;;
     *)
         echo "unsupported host architecture: $(uname -m)" >&2
