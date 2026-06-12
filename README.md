@@ -24,8 +24,10 @@ to one GitHub release artifact:
 out/
   openvmm-deps/        sdk + dbgrd + shell + petritools sysroots
   initrd/              shared busybox-based test rootfs (cpio.gz)
-  linux-6.1/           vmlinux, bzImage/Image, config (kernel only)
-  linux-6.18/          vmlinux, bzImage/Image, config (kernel only)
+  linux-6.1/           vmlinux (stripped) + bzImage/Image + config
+  linux-6.1-debug/     vmlinux.debug (DWARF5 symbols for 6.1)
+  linux-6.18/          vmlinux (stripped) + bzImage/Image + config
+  linux-6.18-debug/    vmlinux.debug (DWARF5 symbols for 6.18)
   qemu/                qemu-system-aarch64, qemu-system-x86_64
 ```
 
@@ -36,7 +38,9 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-deps.<arch>.<ver>.tar.gz`                    | sdk + dbgrd + shell + petritools      |
 | `openvmm-test-initrd.<arch>.<ver>.tar.gz`             | shared initrd (used with any kernel)  |
 | `openvmm-test-linux-6.1.<arch>.<ver>.tar.gz`          | 6.1 LTS kernel images + final config  |
+| `openvmm-test-linux-6.1-debug.<arch>.<ver>.tar.gz`    | 6.1 `vmlinux.debug` symbol file       |
 | `openvmm-test-linux-6.18.<arch>.<ver>.tar.gz`         | 6.18 kernel images + final config     |
+| `openvmm-test-linux-6.18-debug.<arch>.<ver>.tar.gz`   | 6.18 `vmlinux.debug` symbol file      |
 | `openvmm-test-virtio-win.<ver>.tar.gz`                | virtio-win NetKVM drivers (all OS/arch)|
 | `qemu-linux-static.<arch>.<ver>.tar.gz`                | static QEMU system emulators (TCG)    |
 

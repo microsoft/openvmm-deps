@@ -126,22 +126,31 @@ COPY --from=build-initrd --link /out/sysroot.cpio.gz /initrd
 # bind-mounts its pinned source and reads its config from
 # pkg/linux/<version>/<arch>.config (driven by $LINUX_VERSION exported via
 # sysroots/linux-<version>/deps). The kernel result contains only the
-# kernel images and final config; the initrd ships as its own artifact and
-# is shared across all kernel versions. To add a new kernel line, add a
-# matching `src-linux-<ver>` source stage above and a `build-linux-<ver>` /
-# `result-linux-<ver>` pair here, then add a `COPY --from=result-linux-<ver>`
-# line in the final `output` stage.
+# stripped kernel images and final config; the matching DWARF debug info
+# is split out via objcopy into a sibling `result-linux-<ver>-debug`
+# stage so it can ship as its own GitHub release artifact (consumers
+# that don't need symbols don't have to download them). The initrd
+# ships as its own artifact and is shared across all kernel versions.
+# To add a new kernel line, add a matching `src-linux-<ver>` source stage
+# above and a `build-linux-<ver>` / `result-linux-<ver>` /
+# `result-linux-<ver>-debug` triple here, then add matching
+# `COPY --from=result-linux-<ver>` and
+# `COPY --from=result-linux-<ver>-debug` lines in the final `output` stage.
 FROM --platform=$BUILDPLATFORM package-builder AS build-linux-6.1
 RUN --mount=type=bind,from=src-linux-6.1,source=/,target=/pkg/linux/src \
     /pkg/Tools/build.sh sysroots/linux-6.1
 FROM scratch AS result-linux-6.1
 COPY --from=build-linux-6.1 --link /sysroot/boot /
+FROM scratch AS result-linux-6.1-debug
+COPY --from=build-linux-6.1 --link /sysroot/debug /
 
 FROM --platform=$BUILDPLATFORM package-builder AS build-linux-6.18
 RUN --mount=type=bind,from=src-linux-6.18,source=/,target=/pkg/linux/src \
     /pkg/Tools/build.sh sysroots/linux-6.18
 FROM scratch AS result-linux-6.18
 COPY --from=build-linux-6.18 --link /sysroot/boot /
+FROM scratch AS result-linux-6.18-debug
+COPY --from=build-linux-6.18 --link /sysroot/debug /
 
 FROM --platform=$BUILDPLATFORM package-builder AS result-libunwind
 RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
@@ -173,15 +182,18 @@ COPY --from=build-qemu --link /out/ /
 
 # Build the output. The release workflow packs each top-level subdirectory
 # into its own GitHub release artifact:
-#   openvmm-deps/  -> openvmm-deps.<arch>.<release>.tar.gz
-#   initrd/        -> openvmm-test-initrd.<arch>.<release>.tar.gz
-#   linux-<kver>/  -> openvmm-test-linux-<kver>.<arch>.<release>.tar.gz
+#   openvmm-deps/        -> openvmm-deps.<arch>.<release>.tar.gz
+#   initrd/              -> openvmm-test-initrd.<arch>.<release>.tar.gz
+#   linux-<kver>/        -> openvmm-test-linux-<kver>.<arch>.<release>.tar.gz
+#   linux-<kver>-debug/  -> openvmm-test-linux-<kver>-debug.<arch>.<release>.tar.gz
 FROM scratch AS output
-COPY --from=result-dbgrd      --link / /openvmm-deps/
-COPY --from=result-shell      --link / /openvmm-deps/
-COPY --from=result-sdk        --link / /openvmm-deps/
-COPY --from=result-petritools --link / /openvmm-deps/
-COPY --from=result-initrd     --link /initrd /initrd/initrd
-COPY --from=result-linux-6.1  --link / /linux-6.1/
-COPY --from=result-linux-6.18 --link / /linux-6.18/
-COPY --from=result-qemu       --link / /qemu/
+COPY --from=result-dbgrd            --link / /openvmm-deps/
+COPY --from=result-shell            --link / /openvmm-deps/
+COPY --from=result-sdk              --link / /openvmm-deps/
+COPY --from=result-petritools       --link / /openvmm-deps/
+COPY --from=result-initrd           --link /initrd /initrd/initrd
+COPY --from=result-linux-6.1        --link / /linux-6.1/
+COPY --from=result-linux-6.1-debug  --link / /linux-6.1-debug/
+COPY --from=result-linux-6.18       --link / /linux-6.18/
+COPY --from=result-linux-6.18-debug --link / /linux-6.18-debug/
+COPY --from=result-qemu             --link / /qemu/
