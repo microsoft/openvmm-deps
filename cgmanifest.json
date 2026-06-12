@@ -155,6 +155,24 @@
     },
     {
       "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/microsoft/ms-tpm-20-ref-rs",
+          "commitHash": "e0bba1e46d9cdc8630f3693e5e91f8a3be4fad7b"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/microsoft/ms-tpm-20-ref",
+          "commitHash": "2d5660ac249293dcbaed192c70ca208d321ebf5b"
+        }
+      }
+    },
+    {
+      "component": {
         "type": "other",
         "other": {
           "name": "qemu",

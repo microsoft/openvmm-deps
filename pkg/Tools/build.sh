@@ -68,11 +68,16 @@ fi
 # Ensure build dependencies are all installed.
 "$TOOLSDIR/deps.sh"
 
+# Shared cargo setup for any rust-based packages
+cp "$TOOLSDIR/cargo.config.toml" /root/.cargo/config.toml
+export CARGO_BUILD_TARGET="$ARCH-unknown-linux-musl"
+
 for pkg in "${pkgs[@]}"; do
     PKGDIR=$(realpath "$pkg")
     export PKGDIR
     export SRCDIR="$PKGDIR/src"
     export BUILDDIR="/work/$pkg"
+    export CARGO_TARGET_DIR="$BUILDDIR/target"
 
     if [[ -f "$PKGDIR/patch.sh" && ! -f "$PKGDIR/.patched" ]]; then
         (
