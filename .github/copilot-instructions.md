@@ -38,6 +38,10 @@ command beyond `docker build`.
 | `result-petritools` | Performance tools rootfs (fio, iperf3) as EROFS |
 | `result-linux-6.1` | Linux 6.1 LTS kernel images |
 | `result-linux-6.18` | Linux 6.18 kernel images |
+| `result-qemu` | Statically-linked QEMU system emulators |
+
+`virtio-win` (Windows PE driver binaries) is built from a separate
+`Dockerfile.virtio-win`; it is arch-independent and produced by its own CI job.
 
 ## Build Commands
 
@@ -50,9 +54,15 @@ docker build --platform aarch64 --output type=local,dest=out .
 docker build --platform x86_64 --target result-linux-6.1 \
   --output type=local,dest=out/linux-6.1 .
 
+# virtio-win (separate Dockerfile, arch-independent)
+docker build -f Dockerfile.virtio-win --output type=local,dest=out .
+
 # Cross-compilation requires qemu-user-static
 apt install qemu-user-static
 ```
+
+CI builds the `build` job on a self-hosted 1ES runner pool and invokes
+`docker buildx build` (the prebaked image's default builder).
 
 There is no test suite. CI validates the build completes and that
 `cgmanifest.json` is in sync:
