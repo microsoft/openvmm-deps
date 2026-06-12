@@ -49,7 +49,7 @@ TARBALL_LICENSES = {
 }
 
 # SPDX license expressions for git-cloned components keyed by repository URL.
-# Used when TARBALL_LICENSES doesn't have data for the pinned commit, or when
+# Used when ClearlyDefined doesn't have data for the pinned commit, or when
 # we want to avoid a CD round-trip on every CG run.
 GIT_LICENSES = {
     "https://github.com/llvm/llvm-project": "Apache-2.0 WITH LLVM-exception",
