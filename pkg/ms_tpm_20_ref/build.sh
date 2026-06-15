@@ -16,3 +16,4 @@ LIBTPM=$(find "$CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/build" -path '*/ms-
 
 install -d "$SYSROOT/tpm-oss-openssl/lib"
 install -m 644 "$LIBTPM" "$SYSROOT/tpm-oss-openssl/lib/libtpm.a"
+install -m 644 "$LIBTPM" "$SYSROOT/tpm-oss-openssl/lib/ilbruncommand.a"
