@@ -101,6 +101,9 @@ ADD --link https://github.com/microsoft/ms-tpm-20-ref-rs.git#e0bba1e46d9cdc8630f
 # ms-tpm-20-ref (pinned by commit)
 FROM scratch AS src-ms-tpm-20-ref
 ADD --link https://github.com/microsoft/ms-tpm-20-ref.git#2d5660ac249293dcbaed192c70ca208d321ebf5b /
+# mimalloc v2.2.4 (matches the bundled version in libmimalloc-sys 0.1.44 / mimalloc 0.1.48)
+FROM scratch AS src-mimalloc
+ADD --unpack --checksum=sha256:754a98de5e2912fddbeaf24830f982b4540992f1bab4a0a8796ee118e0752bda --link https://github.com/microsoft/mimalloc/archive/refs/tags/v2.2.4.tar.gz /
 # qemu (v11.0.1)
 FROM scratch AS src-qemu
 ADD --unpack --checksum=sha256:b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39 --link https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz /
@@ -116,6 +119,7 @@ RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
     --mount=type=bind,from=src-symcrypt,source=/,target=/pkg/symcrypt/src,rw \
     --mount=type=bind,from=src-ms-tpm-20-ref-rs,source=/,target=/pkg/ms_tpm_20_ref/src,rw \
     --mount=type=bind,from=src-ms-tpm-20-ref,source=/,target=/pkg/ms_tpm_20_ref/src/ms-tpm-20-ref,rw \
+    --mount=type=bind,from=src-mimalloc,source=/mimalloc-2.2.4,target=/pkg/mimalloc/src \
     /pkg/Tools/build.sh sysroots/sdk
 FROM scratch AS result-sdk
 COPY --from=build-sdk --link /out/sysroot.tar.gz /sysroot.tar.gz

@@ -44,6 +44,7 @@ TARBALL_LICENSES = {
     "6985c538143c1208dcb1ac42cedad6ff52e267b47e5f970183a3e75125b43c2e": "LGPL-3.0-or-later",                                   # mpc-1.1.0
     "c05e3f02d09e0e9019384cdd58e0f19c64e6db1fd6f5ecf77b4b1c61ca253acc": "LGPL-3.0-or-later",                                   # mpfr-4.0.2
     "a9a118bbe84d8764da0ea0d28b3ab3fae8477fc7e4085d90102b8596fc7c75e4": "MIT",                                                 # musl-1.2.5
+    "754a98de5e2912fddbeaf24830f982b4540992f1bab4a0a8796ee118e0752bda": "MIT",                                                 # mimalloc-2.2.4
     "e14cf2b94492c3e925f0070ba7fdfedeb2048c91eea9c5a5afb30232a3976331": "BSD-3-Clause",                                         # virtio-win-0.1.285
 }
 
