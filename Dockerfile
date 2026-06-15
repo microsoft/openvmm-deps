@@ -85,6 +85,9 @@ ADD --link https://github.com/gregkh/linux.git#ad16b162f21d970235ced0c7e36e960c2
 # linux v6.18.33 (linux-6.18.y)
 FROM scratch AS src-linux-6.18
 ADD --link https://github.com/gregkh/linux.git#83657f4189612e5cbcabc3058acd36c0bd120729 /
+# linux v7.1-rc1 with the KVM CCA v14 patchset
+FROM scratch AS src-linux-7.1-rc1-kvm-cca
+ADD --link https://gitlab.arm.com/linux-arm/linux-cca.git#f4e94cc01f1bc874ab35a47d308530cb58231d74 /
 # llvm-project (release/17.x) -- used by libunwind and sdk
 FROM scratch AS src-llvm
 ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb6a803753fe18 /
@@ -142,7 +145,7 @@ COPY --from=build-initrd --link /out/sysroot.cpio.gz /initrd
 # is shared across all kernel versions. To add a new kernel line, add a
 # matching `src-linux-<ver>` source stage above and a `build-linux-<ver>` /
 # `result-linux-<ver>` pair here, then add a `COPY --from=result-linux-<ver>`
-# line in the final `output` stage.
+# line in the appropriate output stage.
 FROM --platform=$BUILDPLATFORM package-builder AS build-linux-6.1
 RUN --mount=type=bind,from=src-linux-6.1,source=/,target=/pkg/linux/src \
     /pkg/Tools/build.sh sysroots/linux-6.1
@@ -154,6 +157,12 @@ RUN --mount=type=bind,from=src-linux-6.18,source=/,target=/pkg/linux/src \
     /pkg/Tools/build.sh sysroots/linux-6.18
 FROM scratch AS result-linux-6.18
 COPY --from=build-linux-6.18 --link /sysroot/boot /
+
+FROM --platform=$BUILDPLATFORM package-builder AS build-linux-7.1-rc1-kvm-cca
+RUN --mount=type=bind,from=src-linux-7.1-rc1-kvm-cca,source=/,target=/pkg/linux/src,rw \
+    /pkg/Tools/build.sh sysroots/linux-7.1-rc1-kvm-cca
+FROM scratch AS result-linux-7.1-rc1-kvm-cca
+COPY --from=build-linux-7.1-rc1-kvm-cca --link /sysroot/boot /
 
 FROM --platform=$BUILDPLATFORM package-builder AS result-libunwind
 RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
@@ -183,12 +192,12 @@ RUN --mount=type=bind,from=src-qemu,source=/qemu-11.0.1,target=/pkg/qemu/src,rw 
 FROM scratch AS result-qemu
 COPY --from=build-qemu --link /out/ /
 
-# Build the output. The release workflow packs each top-level subdirectory
-# into its own GitHub release artifact:
+# Build the architecture-neutral output set. The release workflow packs each
+# top-level subdirectory into its own GitHub release artifact:
 #   openvmm-deps/  -> openvmm-deps.<arch>.<release>.tar.gz
 #   initrd/        -> openvmm-test-initrd.<arch>.<release>.tar.gz
 #   linux-<kver>/  -> openvmm-test-linux-<kver>.<arch>.<release>.tar.gz
-FROM scratch AS output
+FROM scratch AS output-base
 COPY --from=result-dbgrd      --link / /openvmm-deps/
 COPY --from=result-shell      --link / /openvmm-deps/
 COPY --from=result-sdk        --link / /openvmm-deps/
@@ -197,3 +206,10 @@ COPY --from=result-initrd     --link /initrd /initrd/initrd
 COPY --from=result-linux-6.1  --link / /linux-6.1/
 COPY --from=result-linux-6.18 --link / /linux-6.18/
 COPY --from=result-qemu       --link / /qemu/
+
+FROM scratch AS output-aarch64
+COPY --from=output-base       --link / /
+COPY --from=result-linux-7.1-rc1-kvm-cca --link / /linux-7.1-rc1-kvm-cca/
+
+FROM scratch AS output
+COPY --from=output-base       --link / /

@@ -1,0 +1,4 @@
+# The Linux 7.1-rc1 test kernel package with the KVM CCA v14 patchset
+
+LINUX_VERSION=7.1-rc1-kvm-cca
+pkg/linux
