@@ -36,7 +36,7 @@ when PUD_SIZE and P4D_SIZE are the same value.
 -	default:
 +	} else {
  		/*
- 		 * Only support mapping at the page level granulatity when
+ 		 * Only support mapping at the page level granularity when
  		 * it's an unusual length. This should get us back onto a larger
  		 * block size for the subsequent mappings.
  		 */

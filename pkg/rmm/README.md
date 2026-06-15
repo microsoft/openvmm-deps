@@ -3,7 +3,7 @@
 This package builds TF-RMM firmware for OpenVMM's Arm CCA QEMU tests.
 
 The `7.1-rc1-kvm-cca` firmware is pinned to TF-RMM
-`tf-rmm-v0.9.0` commit `dd9ec489c099`, matching the RMM v2.0-bet1 firmware
+`tf-rmm-v0.9.0` commit `dd9ec489c099`, matching the RMM v2.0-beta1 firmware
 release called out by the KVM CCA v14 patchset. It uses `qemu_virt_defcfg` and
 ships only for `aarch64`.
 

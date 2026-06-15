@@ -2,6 +2,11 @@
 
 set -e
 
+if [ -z "$LINUX_VERSION" ]; then
+    >&2 echo "LINUX_VERSION must be set (e.g. via sysroots/linux-<ver>/deps)"
+    exit 1
+fi
+
 PKGDIR="${PKGDIR:-$(dirname "$0")}"
 SRCDIR="${SRCDIR:-$PKGDIR/src}"
 PATCHDIR="$PKGDIR/$LINUX_VERSION"
