@@ -11,6 +11,7 @@ apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     git \
+    libssl-dev \
     ninja-build \
     patch \
     perl \

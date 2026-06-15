@@ -103,6 +103,7 @@ jobs:
           KERNELS="6.1 6.18"
           AARCH64_KERNELS="7.1-rc1-kvm-cca"
           AARCH64_RMMS="7.1-rc1-kvm-cca"
+          AARCH64_TFAS="7.1-rc1-kvm-cca"
           for arch in x86_64 aarch64; do
             tar cvzf "package/openvmm-deps.$arch.$VERSION.tar.gz" \
               -C "$arch/openvmm-deps" .
@@ -120,6 +121,10 @@ jobs:
               for rver in $AARCH64_RMMS; do
                 tar cvzf "package/openvmm-test-rmm-$rver.$arch.$VERSION.tar.gz" \
                   -C "$arch/rmm-$rver" .
+              done
+              for tver in $AARCH64_TFAS; do
+                tar cvzf "package/openvmm-test-tfa-$tver.$arch.$VERSION.tar.gz" \
+                  -C "$arch/tfa-$tver" .
               done
             fi
             tar cvzf "package/qemu-linux-static.$arch.$VERSION.tar.gz" \

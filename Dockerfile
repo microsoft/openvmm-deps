@@ -110,9 +110,12 @@ ADD --unpack --checksum=sha256:754a98de5e2912fddbeaf24830f982b4540992f1bab4a0a87
 # qemu (v11.0.1)
 FROM scratch AS src-qemu
 ADD --unpack --checksum=sha256:b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39 --link https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz /
-# TF-RMM topics/rmm-v2.0-poc_2, tested by the KVM CCA v14 patchset
+# TF-RMM v0.9.0, tested by the KVM CCA v14 patchset
 FROM scratch AS src-tf-rmm-7.1-rc1-kvm-cca
-ADD --keep-git-dir=true --link https://git.trustedfirmware.org/TF-RMM/tf-rmm.git#3340667a291acd5722cb45d05135d7aa15174b25 /
+ADD --keep-git-dir=true --link https://git.trustedfirmware.org/TF-RMM/tf-rmm.git#dd9ec489c09956fa748c847966397fa0aba6b0b2 /
+# TF-A v2.15.0, used to load TF-RMM and Linux-direct BL33.
+FROM scratch AS src-tfa-7.1-rc1-kvm-cca
+ADD --keep-git-dir=true --link https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git#da738d5eae93af342fdc4995dd3c05acb4c9d757 /
 # TF-RMM submodules -- pinned by the TF-RMM superproject.
 FROM scratch AS src-tf-rmm-cpputest
 ADD --keep-git-dir=true --link https://github.com/cpputest/cpputest.git#67d2dfd41e13f09ff218aa08e2d35f1c32f032a1 /
@@ -238,12 +241,25 @@ RUN --mount=type=bind,from=src-tf-rmm-7.1-rc1-kvm-cca,source=/,target=/pkg/rmm/s
 FROM scratch AS result-rmm-7.1-rc1-kvm-cca
 COPY --from=build-rmm-7.1-rc1-kvm-cca --link /out/ /
 
+# Build TF-A for QEMU virt CCA tests, with TF-RMM included as RMM and Linux
+# direct boot configured as a preloaded BL33.
+FROM --platform=$BUILDPLATFORM rmm-builder AS tfa-builder
+COPY --link pkg/tfa /pkg/tfa
+
+FROM --platform=$BUILDPLATFORM tfa-builder AS build-tfa-7.1-rc1-kvm-cca
+RUN --mount=type=bind,from=src-tfa-7.1-rc1-kvm-cca,source=/,target=/pkg/tfa/src \
+    --mount=type=bind,from=result-rmm-7.1-rc1-kvm-cca,source=/,target=/pkg/tfa/rmm \
+    TFA_VERSION=7.1-rc1-kvm-cca /pkg/tfa/build.sh
+FROM scratch AS result-tfa-7.1-rc1-kvm-cca
+COPY --from=build-tfa-7.1-rc1-kvm-cca --link /out/ /
+
 # Build the architecture-neutral output set. The release workflow packs each
 # top-level subdirectory into its own GitHub release artifact:
 #   openvmm-deps/  -> openvmm-deps.<arch>.<release>.tar.gz
 #   initrd/        -> openvmm-test-initrd.<arch>.<release>.tar.gz
 #   linux-<kver>/  -> openvmm-test-linux-<kver>.<arch>.<release>.tar.gz
 #   rmm-<rver>/    -> openvmm-test-rmm-<rver>.<arch>.<release>.tar.gz
+#   tfa-<tver>/    -> openvmm-test-tfa-<tver>.<arch>.<release>.tar.gz
 FROM scratch AS output-base
 COPY --from=result-dbgrd      --link / /openvmm-deps/
 COPY --from=result-shell      --link / /openvmm-deps/
@@ -258,6 +274,7 @@ FROM scratch AS output-aarch64
 COPY --from=output-base       --link / /
 COPY --from=result-linux-7.1-rc1-kvm-cca --link / /linux-7.1-rc1-kvm-cca/
 COPY --from=result-rmm-7.1-rc1-kvm-cca --link / /rmm-7.1-rc1-kvm-cca/
+COPY --from=result-tfa-7.1-rc1-kvm-cca --link / /tfa-7.1-rc1-kvm-cca/
 
 FROM scratch AS output
 COPY --from=output-base       --link / /
