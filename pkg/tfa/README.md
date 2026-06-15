@@ -11,15 +11,15 @@ It is built for Linux direct boot:
 
 ```text
 ARM_LINUX_KERNEL_AS_BL33=1
-PRELOADED_BL33_BASE=0x42080000
+PRELOADED_BL33_BASE=0x80080000
 ARM_PRELOADED_DTB_BASE=0x40000000
 ```
 
 TF-A reserves `0x40000000..0x40100000` for the QEMU-generated DTB and
-`0x40100000..0x41900000` for RMM. `0x42080000` keeps the Linux Image clear of
-that range while preserving the arm64 Image `text_offset` (`0x80000`) from a
-2MB-aligned base. QEMU generates the DTB at `0x40000000`; TF-A passes that
-address to Linux in `x0`.
+`0x40100000..0x41900000` for RMM. `0x80080000` keeps the Linux Image in a
+separate 1GiB RMM tracking region while preserving the arm64 Image `text_offset`
+(`0x80000`) from a 2MB-aligned base. QEMU generates the DTB at `0x40000000`;
+TF-A passes that address to Linux in `x0`.
 
 The release artifact is:
 

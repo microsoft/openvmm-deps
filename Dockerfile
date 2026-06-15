@@ -249,7 +249,7 @@ COPY --link pkg/tfa /pkg/tfa
 FROM --platform=$BUILDPLATFORM tfa-builder AS build-tfa-7.1-rc1-kvm-cca
 RUN --mount=type=bind,from=src-tfa-7.1-rc1-kvm-cca,source=/,target=/pkg/tfa/src \
     --mount=type=bind,from=result-rmm-7.1-rc1-kvm-cca,source=/,target=/pkg/tfa/rmm \
-    TFA_VERSION=7.1-rc1-kvm-cca /pkg/tfa/build.sh
+    TFA_VERSION=7.1-rc1-kvm-cca PRELOADED_BL33_BASE=0x80080000 /pkg/tfa/build.sh
 FROM scratch AS result-tfa-7.1-rc1-kvm-cca
 COPY --from=build-tfa-7.1-rc1-kvm-cca --link /out/ /
 
