@@ -102,6 +102,7 @@ jobs:
           # configs, cgmanifest refresh).
           KERNELS="6.1 6.18"
           AARCH64_KERNELS="7.1-rc1-kvm-cca"
+          AARCH64_RMMS="7.1-rc1-kvm-cca"
           for arch in x86_64 aarch64; do
             tar cvzf "package/openvmm-deps.$arch.$VERSION.tar.gz" \
               -C "$arch/openvmm-deps" .
@@ -115,6 +116,12 @@ jobs:
               tar cvzf "package/openvmm-test-linux-$kver.$arch.$VERSION.tar.gz" \
                 -C "$arch/linux-$kver" .
             done
+            if [ "$arch" = "aarch64" ]; then
+              for rver in $AARCH64_RMMS; do
+                tar cvzf "package/openvmm-test-rmm-$rver.$arch.$VERSION.tar.gz" \
+                  -C "$arch/rmm-$rver" .
+              done
+            fi
             tar cvzf "package/qemu-linux-static.$arch.$VERSION.tar.gz" \
               -C "$arch/qemu" .
           done

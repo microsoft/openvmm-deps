@@ -110,6 +110,27 @@ ADD --unpack --checksum=sha256:754a98de5e2912fddbeaf24830f982b4540992f1bab4a0a87
 # qemu (v11.0.1)
 FROM scratch AS src-qemu
 ADD --unpack --checksum=sha256:b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39 --link https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz /
+# TF-RMM topics/rmm-v2.0-poc_2, tested by the KVM CCA v14 patchset
+FROM scratch AS src-tf-rmm-7.1-rc1-kvm-cca
+ADD --keep-git-dir=true --link https://git.trustedfirmware.org/TF-RMM/tf-rmm.git#3340667a291acd5722cb45d05135d7aa15174b25 /
+# TF-RMM submodules -- pinned by the TF-RMM superproject.
+FROM scratch AS src-tf-rmm-cpputest
+ADD --keep-git-dir=true --link https://github.com/cpputest/cpputest.git#67d2dfd41e13f09ff218aa08e2d35f1c32f032a1 /
+FROM scratch AS src-tf-rmm-libspdm
+ADD --keep-git-dir=true --link https://github.com/DMTF/libspdm.git#5ebe5e3946b9439928fa3a7548268c29cccc1b16 /
+FROM scratch AS src-tf-rmm-mbedtls
+ADD --keep-git-dir=true --link https://github.com/ARMmbed/mbedtls.git#107ea89daaefb9867ea9121002fbbdf926780e98 /
+FROM scratch AS src-tf-rmm-minicoro
+ADD --keep-git-dir=true --link https://github.com/edubart/minicoro.git#02dad0f8b7cbb12fe6e216ae7a76db15ca55cd7b /
+FROM scratch AS src-tf-rmm-qcbor
+ADD --keep-git-dir=true --link https://github.com/laurencelundblade/QCBOR.git#92d3f89030baff4af7be8396c563e6c8ef263622 /
+FROM scratch AS src-tf-rmm-spdm-emu
+ADD --keep-git-dir=true --link https://github.com/DMTF/spdm-emu.git#8528ec237824dae97b8db64faadfe216d55eaf6f /
+FROM scratch AS src-tf-rmm-t-cose
+ADD --keep-git-dir=true --link https://github.com/laurencelundblade/t_cose.git#117159b95608ce236bd69e6384e1319d7a212107 /
+# Arm GNU Toolchain 13.3.rel1, required by TF-RMM.
+FROM scratch AS src-arm-gnu-toolchain-aarch64-none-elf
+ADD --unpack --checksum=sha256:7fedf894040580b1db747d06ac5d4263c46e591ffe7695656d1da5accb00a159 --link https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf.tar.xz /
 
 # Build the sdk.
 #
@@ -192,11 +213,37 @@ RUN --mount=type=bind,from=src-qemu,source=/qemu-11.0.1,target=/pkg/qemu/src,rw 
 FROM scratch AS result-qemu
 COPY --from=build-qemu --link /out/ /
 
+# Build TF-RMM for QEMU virt CCA tests. TF-RMM requires a bare-metal
+# aarch64-none-elf GCC toolchain, so keep it separate from the musl package
+# builder used for the Linux/sysroot artifacts.
+FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS rmm-builder
+ARG TARGETARCH
+ENV TARGETARCH=$TARGETARCH
+COPY --link pkg/rmm/deps.sh /pkg/rmm/deps.sh
+RUN /pkg/rmm/deps.sh
+COPY --from=src-arm-gnu-toolchain-aarch64-none-elf --link /arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf /opt/arm-gnu-toolchain
+COPY --link pkg/rmm /pkg/rmm
+ENV PATH="/opt/arm-gnu-toolchain/bin:${PATH}"
+
+FROM --platform=$BUILDPLATFORM rmm-builder AS build-rmm-7.1-rc1-kvm-cca
+RUN --mount=type=bind,from=src-tf-rmm-7.1-rc1-kvm-cca,source=/,target=/pkg/rmm/src \
+    --mount=type=bind,from=src-tf-rmm-cpputest,source=/,target=/pkg/rmm/submodules/cpputest \
+    --mount=type=bind,from=src-tf-rmm-libspdm,source=/,target=/pkg/rmm/submodules/libspdm \
+    --mount=type=bind,from=src-tf-rmm-mbedtls,source=/,target=/pkg/rmm/submodules/mbedtls \
+    --mount=type=bind,from=src-tf-rmm-minicoro,source=/,target=/pkg/rmm/submodules/minicoro \
+    --mount=type=bind,from=src-tf-rmm-qcbor,source=/,target=/pkg/rmm/submodules/qcbor \
+    --mount=type=bind,from=src-tf-rmm-spdm-emu,source=/,target=/pkg/rmm/submodules/spdm-emu \
+    --mount=type=bind,from=src-tf-rmm-t-cose,source=/,target=/pkg/rmm/submodules/t_cose \
+    RMM_VERSION=7.1-rc1-kvm-cca RMM_CONFIG=qemu_virt_defcfg /pkg/rmm/build.sh
+FROM scratch AS result-rmm-7.1-rc1-kvm-cca
+COPY --from=build-rmm-7.1-rc1-kvm-cca --link /out/ /
+
 # Build the architecture-neutral output set. The release workflow packs each
 # top-level subdirectory into its own GitHub release artifact:
 #   openvmm-deps/  -> openvmm-deps.<arch>.<release>.tar.gz
 #   initrd/        -> openvmm-test-initrd.<arch>.<release>.tar.gz
 #   linux-<kver>/  -> openvmm-test-linux-<kver>.<arch>.<release>.tar.gz
+#   rmm-<rver>/    -> openvmm-test-rmm-<rver>.<arch>.<release>.tar.gz
 FROM scratch AS output-base
 COPY --from=result-dbgrd      --link / /openvmm-deps/
 COPY --from=result-shell      --link / /openvmm-deps/
@@ -210,6 +257,7 @@ COPY --from=result-qemu       --link / /qemu/
 FROM scratch AS output-aarch64
 COPY --from=output-base       --link / /
 COPY --from=result-linux-7.1-rc1-kvm-cca --link / /linux-7.1-rc1-kvm-cca/
+COPY --from=result-rmm-7.1-rc1-kvm-cca --link / /rmm-7.1-rc1-kvm-cca/
 
 FROM scratch AS output
 COPY --from=output-base       --link / /

@@ -1,0 +1,19 @@
+From: Will Wright <wwright@microsoft.com>
+Subject: [PATCH] Skip submodule update for pinned openvmm-deps build
+
+openvmm-deps supplies TF-RMM submodules as explicit, pinned Docker inputs.
+Do not let CMake fetch submodules from the network during configure.
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -23,9 +23,8 @@ include(ArmConfigOption)
+ include(ArmConfigOptionOverride)
+ 
+ #
+-# Update the Submodules
++# Submodules are supplied by openvmm-deps as pinned Docker inputs.
+ #
+-Git_Update_Submodule()
+ 
+ #
+ # Run preliminary setup scripts.
