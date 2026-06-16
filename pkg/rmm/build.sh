@@ -43,6 +43,20 @@ cmake -S "$src" -B "$build" -G Ninja \
 
 cmake --build "$build" --target rmm --parallel
 
+artifact_dir=
+for candidate in "$build/Release" "$build"; do
+    if [ -f "$candidate/rmm.img" ]; then
+        artifact_dir="$candidate"
+        break
+    fi
+done
+
+if [ -z "$artifact_dir" ]; then
+    echo "missing TF-RMM artifacts under $build/Release or $build" >&2
+    find "$build" -maxdepth 2 -type f \( -name 'rmm*.img' -o -name 'rmm*.elf' -o -name 'rmm*.map' \) >&2
+    exit 1
+fi
+
 for artifact in rmm.img rmm.elf rmm_core.img rmm_core.elf rmm_core.map; do
-    install -Dm644 "$build/Release/$artifact" "$OUTPUTDIR/$artifact"
+    install -Dm644 "$artifact_dir/$artifact" "$OUTPUTDIR/$artifact"
 done
