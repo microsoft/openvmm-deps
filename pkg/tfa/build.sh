@@ -7,7 +7,7 @@ PKGDIR="${PKGDIR:-/pkg/tfa}"
 SRCDIR="${SRCDIR:-$PKGDIR/src}"
 BUILDDIR="${BUILDDIR:-/work/tfa}"
 OUTPUTDIR="${OUTPUTDIR:-/out}"
-TFA_VERSION="${TFA_VERSION:-7.1-rc1-kvm-cca}"
+TFA_FLAVOR="${TFA_FLAVOR:-cca}"
 RMM_IMAGE="${RMM_IMAGE:-$PKGDIR/rmm/rmm.img}"
 PRELOADED_BL33_BASE="${PRELOADED_BL33_BASE:-0x80080000}"
 ARM_PRELOADED_DTB_BASE="${ARM_PRELOADED_DTB_BASE:-0x40000000}"
@@ -30,7 +30,7 @@ rm -rf "$src" "$build_base"
 mkdir -p "$src" "$OUTPUTDIR"
 cp -a "$SRCDIR"/. "$src"/
 
-for patch_file in "$PKGDIR/$TFA_VERSION"/*.patch; do
+for patch_file in "$PKGDIR/$TFA_FLAVOR"/*.patch; do
     [ -f "$patch_file" ] || continue
     echo "Applying $(basename "$patch_file")"
     patch -d "$src" -p1 < "$patch_file"
@@ -75,7 +75,7 @@ TF-A platform: qemu
 FEAT_RME enabled: yes
 RMM enabled: yes
 GIC driver: QEMU_GICV3
-RMM: rmm.img from openvmm-test-rmm-$TFA_VERSION
+RMM: rmm.img from openvmm-test-rmm-$TFA_FLAVOR
 Linux direct boot: yes
 PRELOADED_BL33_BASE: $PRELOADED_BL33_BASE
 ARM_PRELOADED_DTB_BASE: $ARM_PRELOADED_DTB_BASE

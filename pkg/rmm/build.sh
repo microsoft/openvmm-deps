@@ -7,7 +7,7 @@ PKGDIR="${PKGDIR:-/pkg/rmm}"
 SRCDIR="${SRCDIR:-$PKGDIR/src}"
 BUILDDIR="${BUILDDIR:-/work/rmm}"
 OUTPUTDIR="${OUTPUTDIR:-/out}"
-RMM_VERSION="${RMM_VERSION:-7.1-rc1-kvm-cca}"
+RMM_FLAVOR="${RMM_FLAVOR:-cca}"
 RMM_CONFIG="${RMM_CONFIG:-qemu_virt_defcfg}"
 
 case "${TARGETARCH:-}" in
@@ -28,7 +28,7 @@ for submodule in cpputest libspdm mbedtls minicoro qcbor spdm-emu t_cose; do
     cp -a "$PKGDIR/submodules/$submodule"/. "$src/ext/$submodule"/
 done
 
-for patch_file in "$PKGDIR/$RMM_VERSION"/*.patch; do
+for patch_file in "$PKGDIR/$RMM_FLAVOR"/*.patch; do
     [ -f "$patch_file" ] || continue
     echo "Applying $(basename "$patch_file")"
     patch -d "$src" -p1 < "$patch_file"

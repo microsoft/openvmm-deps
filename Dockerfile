@@ -111,10 +111,10 @@ ADD --unpack --checksum=sha256:754a98de5e2912fddbeaf24830f982b4540992f1bab4a0a87
 FROM scratch AS src-qemu
 ADD --unpack --checksum=sha256:b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39 --link https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz /
 # TF-RMM integration branch, tested with the KVM CCA v14 patchset.
-FROM scratch AS src-tf-rmm-7.1-rc1-kvm-cca
+FROM scratch AS src-tf-rmm-cca
 ADD --keep-git-dir=true --link https://git.trustedfirmware.org/TF-RMM/tf-rmm.git#a2be2c263a77e2ccefd2f47f2f621721e93bea46 /
 # TF-A v2.15.0, used to load TF-RMM and Linux-direct BL33.
-FROM scratch AS src-tfa-7.1-rc1-kvm-cca
+FROM scratch AS src-tfa-cca
 ADD --keep-git-dir=true --link https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git#da738d5eae93af342fdc4995dd3c05acb4c9d757 /
 # TF-RMM submodules -- pinned by the TF-RMM superproject.
 FROM scratch AS src-tf-rmm-cpputest
@@ -228,8 +228,8 @@ COPY --from=src-arm-gnu-toolchain-aarch64-none-elf --link /arm-gnu-toolchain-13.
 COPY --link pkg/rmm /pkg/rmm
 ENV PATH="/opt/arm-gnu-toolchain/bin:${PATH}"
 
-FROM --platform=$BUILDPLATFORM rmm-builder AS build-rmm-7.1-rc1-kvm-cca
-RUN --mount=type=bind,from=src-tf-rmm-7.1-rc1-kvm-cca,source=/,target=/pkg/rmm/src \
+FROM --platform=$BUILDPLATFORM rmm-builder AS build-rmm-cca
+RUN --mount=type=bind,from=src-tf-rmm-cca,source=/,target=/pkg/rmm/src \
     --mount=type=bind,from=src-tf-rmm-cpputest,source=/,target=/pkg/rmm/submodules/cpputest \
     --mount=type=bind,from=src-tf-rmm-libspdm,source=/,target=/pkg/rmm/submodules/libspdm \
     --mount=type=bind,from=src-tf-rmm-mbedtls,source=/,target=/pkg/rmm/submodules/mbedtls \
@@ -237,21 +237,21 @@ RUN --mount=type=bind,from=src-tf-rmm-7.1-rc1-kvm-cca,source=/,target=/pkg/rmm/s
     --mount=type=bind,from=src-tf-rmm-qcbor,source=/,target=/pkg/rmm/submodules/qcbor \
     --mount=type=bind,from=src-tf-rmm-spdm-emu,source=/,target=/pkg/rmm/submodules/spdm-emu \
     --mount=type=bind,from=src-tf-rmm-t-cose,source=/,target=/pkg/rmm/submodules/t_cose \
-    RMM_VERSION=7.1-rc1-kvm-cca RMM_CONFIG=qemu_virt_defcfg /pkg/rmm/build.sh
-FROM scratch AS result-rmm-7.1-rc1-kvm-cca
-COPY --from=build-rmm-7.1-rc1-kvm-cca --link /out/ /
+    RMM_FLAVOR=cca RMM_CONFIG=qemu_virt_defcfg /pkg/rmm/build.sh
+FROM scratch AS result-rmm-cca
+COPY --from=build-rmm-cca --link /out/ /
 
 # Build TF-A for QEMU virt CCA tests, with TF-RMM included as RMM and Linux
 # direct boot configured as a preloaded BL33.
 FROM --platform=$BUILDPLATFORM rmm-builder AS tfa-builder
 COPY --link pkg/tfa /pkg/tfa
 
-FROM --platform=$BUILDPLATFORM tfa-builder AS build-tfa-7.1-rc1-kvm-cca
-RUN --mount=type=bind,from=src-tfa-7.1-rc1-kvm-cca,source=/,target=/pkg/tfa/src \
-    --mount=type=bind,from=result-rmm-7.1-rc1-kvm-cca,source=/,target=/pkg/tfa/rmm \
-    TFA_VERSION=7.1-rc1-kvm-cca /pkg/tfa/build.sh
-FROM scratch AS result-tfa-7.1-rc1-kvm-cca
-COPY --from=build-tfa-7.1-rc1-kvm-cca --link /out/ /
+FROM --platform=$BUILDPLATFORM tfa-builder AS build-tfa-cca
+RUN --mount=type=bind,from=src-tfa-cca,source=/,target=/pkg/tfa/src \
+    --mount=type=bind,from=result-rmm-cca,source=/,target=/pkg/tfa/rmm \
+    TFA_FLAVOR=cca /pkg/tfa/build.sh
+FROM scratch AS result-tfa-cca
+COPY --from=build-tfa-cca --link /out/ /
 
 # Build the architecture-neutral output set. The release workflow packs each
 # top-level subdirectory into its own GitHub release artifact:
@@ -273,8 +273,8 @@ COPY --from=result-qemu       --link / /qemu/
 FROM scratch AS output-aarch64
 COPY --from=output-base       --link / /
 COPY --from=result-linux-7.1-rc1-kvm-cca --link / /linux-7.1-rc1-kvm-cca/
-COPY --from=result-rmm-7.1-rc1-kvm-cca --link / /rmm-7.1-rc1-kvm-cca/
-COPY --from=result-tfa-7.1-rc1-kvm-cca --link / /tfa-7.1-rc1-kvm-cca/
+COPY --from=result-rmm-cca --link / /rmm-cca/
+COPY --from=result-tfa-cca --link / /tfa-cca/
 
 FROM scratch AS output
 COPY --from=output-base       --link / /

@@ -2,7 +2,7 @@
 
 This package builds Trusted Firmware-A for OpenVMM's Arm CCA QEMU tests.
 
-The `7.1-rc1-kvm-cca` firmware is pinned to TF-A
+The `cca` firmware is pinned to TF-A
 `v2.15.0` commit `da738d5eae93`, uses the QEMU `virt` platform, enables
 FEAT_RME/RMM, and includes the matching TF-RMM `rmm.img` via TF-A's standard
 `RMM=` build input.
@@ -24,7 +24,7 @@ TF-A passes that address to Linux in `x0`.
 The release artifact is:
 
 ```text
-openvmm-test-tfa-7.1-rc1-kvm-cca.aarch64.<release>.tar.gz
+openvmm-test-tfa-cca.aarch64.<release>.tar.gz
 ```
 
 It contains:
