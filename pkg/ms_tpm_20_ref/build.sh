@@ -11,8 +11,11 @@ set -e
 cd "$SRCDIR"
 cargo check --release --locked
 
-# `build.rs` writes libtpm.a under `OUT_DIR/ms-tpm-20-ref/`.
+# `build.rs` writes libtpm.a under `OUT_DIR/ms-tpm-20-ref/`, and
+# librun_command.a directly under `OUT_DIR/`.
 LIBTPM=$(find "$CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/build" -path '*/ms-tpm-20-ref-*/out/ms-tpm-20-ref/libtpm.a' -print -quit)
+LIBRUNCOMMAND=$(find "$CARGO_TARGET_DIR/$CARGO_BUILD_TARGET/release/build" -path '*/ms-tpm-20-ref-*/out/librun_command.a' -print -quit)
 
 install -d "$SYSROOT/tpm-oss-openssl/lib"
 install -m 644 "$LIBTPM" "$SYSROOT/tpm-oss-openssl/lib/libtpm.a"
+install -m 644 "$LIBRUNCOMMAND" "$SYSROOT/tpm-oss-openssl/lib/librun_command.a"
