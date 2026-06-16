@@ -208,7 +208,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://git.trustedfirmware.org/TF-RMM/tf-rmm",
-          "commitHash": "dd9ec489c09956fa748c847966397fa0aba6b0b2"
+          "commitHash": "a2be2c263a77e2ccefd2f47f2f621721e93bea46"
         }
       }
     },
