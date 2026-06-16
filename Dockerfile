@@ -112,10 +112,10 @@ FROM scratch AS src-qemu
 ADD --unpack --checksum=sha256:b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39 --link https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz /
 # TF-RMM integration branch, tested with the KVM CCA v14 patchset.
 FROM scratch AS src-tf-rmm-cca
-ADD --keep-git-dir=true --link https://git.trustedfirmware.org/TF-RMM/tf-rmm.git#a2be2c263a77e2ccefd2f47f2f621721e93bea46 /
+ADD --keep-git-dir=true --link https://github.com/TF-RMM/tf-rmm.git#a2be2c263a77e2ccefd2f47f2f621721e93bea46 /
 # TF-A v2.15.0, used to load TF-RMM and Linux-direct BL33.
 FROM scratch AS src-tfa-cca
-ADD --keep-git-dir=true --link https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git#da738d5eae93af342fdc4995dd3c05acb4c9d757 /
+ADD --keep-git-dir=true --link https://github.com/TrustedFirmware-A/trusted-firmware-a.git#da738d5eae93af342fdc4995dd3c05acb4c9d757 /
 # TF-RMM submodules -- pinned by the TF-RMM superproject.
 FROM scratch AS src-tf-rmm-cpputest
 ADD --keep-git-dir=true --link https://github.com/cpputest/cpputest.git#67d2dfd41e13f09ff218aa08e2d35f1c32f032a1 /
