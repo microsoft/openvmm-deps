@@ -86,7 +86,7 @@ ADD --link https://github.com/gregkh/linux.git#ad16b162f21d970235ced0c7e36e960c2
 FROM scratch AS src-linux-6.18
 ADD --link https://github.com/gregkh/linux.git#83657f4189612e5cbcabc3058acd36c0bd120729 /
 # linux v7.1-rc1 with the KVM CCA v14 patchset
-FROM scratch AS src-linux-7.1-rc1-kvm-cca
+FROM scratch AS src-linux-kvm-cca-dev
 ADD --link https://gitlab.arm.com/linux-arm/linux-cca.git#f4e94cc01f1bc874ab35a47d308530cb58231d74 /
 # llvm-project (release/17.x) -- used by libunwind and sdk
 FROM scratch AS src-llvm
@@ -182,11 +182,11 @@ RUN --mount=type=bind,from=src-linux-6.18,source=/,target=/pkg/linux/src \
 FROM scratch AS result-linux-6.18
 COPY --from=build-linux-6.18 --link /sysroot/boot /
 
-FROM --platform=$BUILDPLATFORM package-builder AS build-linux-7.1-rc1-kvm-cca
-RUN --mount=type=bind,from=src-linux-7.1-rc1-kvm-cca,source=/,target=/pkg/linux/src,rw \
-    /pkg/Tools/build.sh sysroots/linux-7.1-rc1-kvm-cca
-FROM scratch AS result-linux-7.1-rc1-kvm-cca
-COPY --from=build-linux-7.1-rc1-kvm-cca --link /sysroot/boot /
+FROM --platform=$BUILDPLATFORM package-builder AS build-linux-kvm-cca-dev
+RUN --mount=type=bind,from=src-linux-kvm-cca-dev,source=/,target=/pkg/linux/src,rw \
+    /pkg/Tools/build.sh sysroots/linux-kvm-cca-dev
+FROM scratch AS result-linux-kvm-cca-dev
+COPY --from=build-linux-kvm-cca-dev --link /sysroot/boot /
 
 FROM --platform=$BUILDPLATFORM package-builder AS result-libunwind
 RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
@@ -272,7 +272,7 @@ COPY --from=result-qemu       --link / /qemu/
 
 FROM scratch AS output-aarch64
 COPY --from=output-base       --link / /
-COPY --from=result-linux-7.1-rc1-kvm-cca --link / /linux-7.1-rc1-kvm-cca/
+COPY --from=result-linux-kvm-cca-dev --link / /linux-kvm-cca-dev/
 COPY --from=result-rmm-cca --link / /rmm-cca/
 COPY --from=result-tfa-cca --link / /tfa-cca/
 

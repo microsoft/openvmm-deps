@@ -100,7 +100,7 @@ jobs:
           # (new src-/build-/result- Dockerfile stages, sysroots/linux-<ver>/deps,
           # configs, cgmanifest refresh).
           KERNELS="6.1 6.18"
-          AARCH64_KERNELS="7.1-rc1-kvm-cca"
+          AARCH64_KERNELS="kvm-cca-dev"
           AARCH64_RMMS="cca"
           AARCH64_TFAS="cca"
           for arch in x86_64 aarch64; do
