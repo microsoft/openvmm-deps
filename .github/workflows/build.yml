@@ -105,6 +105,8 @@ jobs:
             for kver in $KERNELS; do
               tar cvzf "package/openvmm-test-linux-$kver.$arch.$VERSION.tar.gz" \
                 -C "$arch/linux-$kver" .
+              tar cvzf "package/openvmm-test-linux-$kver-debug.$arch.$VERSION.tar.gz" \
+                -C "$arch/linux-$kver-debug" .
             done
             tar cvzf "package/qemu-linux-static.$arch.$VERSION.tar.gz" \
               -C "$arch/qemu" .
