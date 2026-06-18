@@ -1,0 +1,4 @@
+# The KVM CCA development test kernel package
+
+LINUX_VERSION=kvm-cca-dev
+pkg/linux

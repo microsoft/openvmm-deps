@@ -129,6 +129,15 @@
       "component": {
         "type": "git",
         "git": {
+          "repositoryUrl": "https://gitlab.arm.com/linux-arm/linux-cca",
+          "commitHash": "f4e94cc01f1bc874ab35a47d308530cb58231d74"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
           "repositoryUrl": "https://github.com/llvm/llvm-project",
           "commitHash": "6009708b4367171ccdbf4b5905cb6a803753fe18"
         }
@@ -191,6 +200,98 @@
           "version": "11.0.1",
           "downloadUrl": "https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz",
           "hash": "b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/TF-RMM/tf-rmm",
+          "commitHash": "a2be2c263a77e2ccefd2f47f2f621721e93bea46"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/TrustedFirmware-A/trusted-firmware-a",
+          "commitHash": "da738d5eae93af342fdc4995dd3c05acb4c9d757"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/cpputest/cpputest",
+          "commitHash": "67d2dfd41e13f09ff218aa08e2d35f1c32f032a1"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/DMTF/libspdm",
+          "commitHash": "5ebe5e3946b9439928fa3a7548268c29cccc1b16"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/ARMmbed/mbedtls",
+          "commitHash": "107ea89daaefb9867ea9121002fbbdf926780e98"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/edubart/minicoro",
+          "commitHash": "02dad0f8b7cbb12fe6e216ae7a76db15ca55cd7b"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/laurencelundblade/QCBOR",
+          "commitHash": "92d3f89030baff4af7be8396c563e6c8ef263622"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/DMTF/spdm-emu",
+          "commitHash": "8528ec237824dae97b8db64faadfe216d55eaf6f"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/laurencelundblade/t_cose",
+          "commitHash": "117159b95608ce236bd69e6384e1319d7a212107"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "other",
+        "other": {
+          "name": "arm-gnu-toolchain",
+          "version": "13.3.rel1-x86_64-aarch64-none-elf",
+          "downloadUrl": "https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf.tar.xz",
+          "hash": "7fedf894040580b1db747d06ac5d4263c46e591ffe7695656d1da5accb00a159"
         }
       }
     },

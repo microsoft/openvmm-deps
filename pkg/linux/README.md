@@ -5,8 +5,9 @@ test kernels. These kernels are used by the petri test framework with Linux
 direct boot (`Firmware::LinuxDirect`).
 
 The build is structured to support multiple kernel lines side-by-side.
-Today **6.1** (LTS) and **6.18** ship; additional lines can be added
-purely additively (see "Adding a new kernel version" below). Each kernel
+Today **6.1** (LTS), **6.18**, and **kvm-cca-dev** ship; additional lines can
+be added purely additively (see "Adding a new kernel version" below). The
+**kvm-cca-dev** line is Arm-only and ships for `aarch64` only. Each kernel
 is published as its own GitHub release artifact
 (`openvmm-test-linux-<version>.<arch>.<release>.tar.gz`) containing the
 kernel images and final config. The initrd is shared across all kernels
@@ -26,6 +27,8 @@ pkg/linux/
   6.18/
     x86_64.config         # Kernel config for 6.18 / x86_64
     aarch64.config        # Kernel config for 6.18 / aarch64
+  kvm-cca-dev/
+    aarch64.config        # Kernel config for CCA host v14 / aarch64
 ```
 
 The version selection is driven by `$LINUX_VERSION`, which is exported by
@@ -33,7 +36,9 @@ the corresponding `sysroots/linux-<version>/deps` file (a single line of
 the form `LINUX_VERSION=<version>`, picked up by `pkg/Tools/build.sh`'s env
 handling). The Dockerfile pins one source-tree commit per kernel line
 (`src-linux-6.1`, etc.) and bind-mounts the matching source into the
-corresponding `build-linux-<version>` stage.
+corresponding `build-linux-<version>` stage. The **kvm-cca-dev** line is
+pinned to Arm's `linux-cca` `cca-host/v14` branch, which contains the v14 KVM
+Arm CCA patchset based on v7.1-rc1.
 
 ## Updating a kernel config
 
