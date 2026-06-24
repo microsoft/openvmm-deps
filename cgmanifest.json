@@ -167,7 +167,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://github.com/microsoft/ms-tpm-20-ref-rs",
-          "commitHash": "07a121e4b46659cdfa8711740c6622728adffd65"
+          "commitHash": "9a24154df7b09cd1a0b90f25a7bf9cbb16e24c7d"
         }
       }
     },

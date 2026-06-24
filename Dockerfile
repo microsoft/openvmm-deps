@@ -100,7 +100,7 @@ FROM scratch AS src-symcrypt
 ADD --keep-git-dir=true --link https://github.com/microsoft/symcrypt.git#cc7902403ec3e53df9cd0f25f5775c762ca7ccb5 /
 # ms-tpm-20-ref-rs (pinned by commit)
 FROM scratch AS src-ms-tpm-20-ref-rs
-ADD --link https://github.com/microsoft/ms-tpm-20-ref-rs.git#07a121e4b46659cdfa8711740c6622728adffd65 /
+ADD --link https://github.com/microsoft/ms-tpm-20-ref-rs.git#9a24154df7b09cd1a0b90f25a7bf9cbb16e24c7d /
 # ms-tpm-20-ref (pinned by commit)
 FROM scratch AS src-ms-tpm-20-ref
 ADD --link https://github.com/microsoft/ms-tpm-20-ref.git#2d5660ac249293dcbaed192c70ca208d321ebf5b /
