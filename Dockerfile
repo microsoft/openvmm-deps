@@ -134,6 +134,10 @@ ADD --keep-git-dir=true --link https://github.com/laurencelundblade/t_cose.git#1
 # Arm GNU Toolchain 13.3.rel1, required by TF-RMM.
 FROM scratch AS src-arm-gnu-toolchain-aarch64-none-elf
 ADD --unpack --checksum=sha256:7fedf894040580b1db747d06ac5d4263c46e591ffe7695656d1da5accb00a159 --link https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-elf.tar.xz /
+# virtio-villain -- guest-side virtio protocol conformance/fault-injection
+# suite. Pinned to the v0.6.0 release commit.
+FROM scratch AS src-virtio-villain
+ADD --link https://github.com/weltling/virtio-villain.git#ce7886f63ec5f6a7ee8215b3517a3f3c42f42ea4 /
 
 # Build the sdk.
 #
@@ -160,6 +164,17 @@ COPY --from=base-initrd --link /sysroot /sysroot
 RUN BUILD_CPIO=1 /pkg/Tools/build.sh sysroots/initrd
 FROM scratch AS result-initrd
 COPY --from=build-initrd --link /out/sysroot.cpio.gz /initrd
+
+# Build virtio-villain: cross-compile the static musl `init`, pack it into a
+# cpio initramfs (BUILD_CPIO, like the initrd package), and dump the test
+# registry TSV (via binfmt/qemu-user). Uses the shared musl cross toolchain
+# from package-builder.
+FROM --platform=$BUILDPLATFORM package-builder AS build-virtio-villain
+RUN --mount=type=bind,from=src-virtio-villain,source=/,target=/pkg/virtio-villain/src \
+    BUILD_CPIO=1 /pkg/Tools/build.sh pkg/virtio-villain
+FROM scratch AS result-virtio-villain
+COPY --from=build-virtio-villain --link /out/sysroot.cpio.gz /initramfs.cpio.gz
+COPY --from=build-virtio-villain --link /out/tests.tsv /tests.tsv
 
 # Build the Linux test kernels. One stage per kernel version; each stage
 # bind-mounts its pinned source and reads its config from
@@ -260,6 +275,7 @@ COPY --from=build-tfa-cca --link /out/ /
 #   linux-<kver>/  -> openvmm-test-linux-<kver>.<arch>.<release>.tar.gz
 #   rmm-<rver>/    -> openvmm-test-rmm-<rver>.<arch>.<release>.tar.gz
 #   tfa-<tver>/    -> openvmm-test-tfa-<tver>.<arch>.<release>.tar.gz
+#   virtio-villain/ -> openvmm-test-virtio-villain.<arch>.<release>.tar.gz
 FROM scratch AS output-base
 COPY --from=result-dbgrd      --link / /openvmm-deps/
 COPY --from=result-shell      --link / /openvmm-deps/
@@ -269,6 +285,9 @@ COPY --from=result-initrd     --link /initrd /initrd/initrd
 COPY --from=result-linux-6.1  --link / /linux-6.1/
 COPY --from=result-linux-6.18 --link / /linux-6.18/
 COPY --from=result-qemu       --link / /qemu/
+# virtio-villain guest binaries. The cross-built `init` is packed into the
+# initramfs and run under binfmt/qemu-user to dump tests.tsv.
+COPY --from=result-virtio-villain --link / /virtio-villain/
 
 FROM scratch AS output-aarch64
 COPY --from=output-base       --link / /

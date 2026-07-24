@@ -297,6 +297,16 @@
     },
     {
       "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/weltling/virtio-villain",
+          "commitHash": "ce7886f63ec5f6a7ee8215b3517a3f3c42f42ea4"
+        }
+      },
+      "license": "Apache-2.0"
+    },
+    {
+      "component": {
         "type": "other",
         "other": {
           "name": "virtio-win",
