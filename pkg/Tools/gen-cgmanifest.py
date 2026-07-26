@@ -53,6 +53,7 @@ TARBALL_LICENSES = {
 # we want to avoid a CD round-trip on every CG run.
 GIT_LICENSES = {
     "https://github.com/llvm/llvm-project": "Apache-2.0 WITH LLVM-exception",
+    "https://github.com/weltling/virtio-villain": "Apache-2.0",
 }
 
 text = ""

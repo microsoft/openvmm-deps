@@ -129,6 +129,9 @@ jobs:
             fi
             tar cvzf "package/qemu-linux-static.$arch.$VERSION.tar.gz" \
               -C "$arch/qemu" .
+            # virtio-villain guest binaries (both arches).
+            tar cvzf "package/openvmm-test-virtio-villain.$arch.$VERSION.tar.gz" \
+              -C "$arch/virtio-villain" .
           done
           # virtio-win is arch-independent (Windows PE binaries).
           tar cvzf "package/openvmm-test-virtio-win.$VERSION.tar.gz" \

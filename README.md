@@ -30,6 +30,7 @@ out/
   rmm-cca/             rmm.img and debug artifacts (aarch64 output only)
   tfa-cca/             flash.bin and debug artifacts (aarch64 output only)
   qemu/                qemu-system-aarch64, qemu-system-x86_64
+  virtio-villain/      initramfs.cpio.gz, tests.tsv
 ```
 
 The release pipeline packs each of these into its own tarball:
@@ -44,6 +45,7 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-test-rmm-cca.aarch64.<ver>.tar.gz`             | TF-RMM firmware for QEMU virt CCA tests |
 | `openvmm-test-tfa-cca.aarch64.<ver>.tar.gz`             | TF-A firmware for Linux-direct QEMU virt CCA tests |
 | `openvmm-test-virtio-win.<ver>.tar.gz`                | virtio-win NetKVM drivers (all OS/arch)|
+| `openvmm-test-virtio-villain.<arch>.<ver>.tar.gz`     | virtio-villain guest initramfs + `tests.tsv` |
 | `qemu-linux-static.<arch>.<ver>.tar.gz`                | static QEMU system emulators (TCG)    |
 
 The `openvmm-deps` tarball no longer contains a kernel; consumers that
