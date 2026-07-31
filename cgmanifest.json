@@ -149,7 +149,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://github.com/openssl/openssl",
-          "commitHash": "27315a978e280a20c7f3ea0bfe05f6c186137625"
+          "commitHash": "8cf17aaeb4599f8af87fefd810b5b5fee90fe69e"
         }
       }
     },

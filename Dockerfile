@@ -91,9 +91,9 @@ ADD --link https://gitlab.arm.com/linux-arm/linux-cca.git#f4e94cc01f1bc874ab35a4
 # llvm-project (release/17.x) -- used by libunwind and sdk
 FROM scratch AS src-llvm
 ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb6a803753fe18 /
-# openssl (~3.2.0-dev)
+# openssl (3.5.7)
 FROM scratch AS src-openssl
-ADD --link https://github.com/openssl/openssl.git#27315a978e280a20c7f3ea0bfe05f6c186137625 /
+ADD --link https://github.com/openssl/openssl.git#8cf17aaeb4599f8af87fefd810b5b5fee90fe69e /
 # symcrypt (v103.13.0-dev)
 # SymCrypt requires git metadata during its build
 FROM scratch AS src-symcrypt
