@@ -94,10 +94,10 @@ ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb
 # openssl (3.5.7)
 FROM scratch AS src-openssl
 ADD --link https://github.com/openssl/openssl.git#8cf17aaeb4599f8af87fefd810b5b5fee90fe69e /
-# symcrypt (v103.13.0-dev)
+# symcrypt (v103.13.0)
 # SymCrypt requires git metadata during its build
 FROM scratch AS src-symcrypt
-ADD --keep-git-dir=true --link https://github.com/microsoft/symcrypt.git#cc7902403ec3e53df9cd0f25f5775c762ca7ccb5 /
+ADD --keep-git-dir=true --link https://github.com/microsoft/symcrypt.git#286762b7730e2b780678f5ab11fef2b1bad639e0 /
 # ms-tpm-20-ref-rs (pinned by commit)
 FROM scratch AS src-ms-tpm-20-ref-rs
 ADD --link https://github.com/microsoft/ms-tpm-20-ref-rs.git#9a24154df7b09cd1a0b90f25a7bf9cbb16e24c7d /
