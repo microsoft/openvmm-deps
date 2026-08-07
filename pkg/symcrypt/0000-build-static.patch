@@ -4,15 +4,15 @@ Date: Fri, 24 Apr 2026 17:31:20 -0400
 Subject: [PATCH] Change the symcrypt_generic_posix target to build a static library
 
 ---
- modules/posix/common/ModuleCommon.cmake | 21 ++++++++++++++++++++-
+ modules/posix/common/ModuleCommon.cmake | 22 +++++++++++++++++++++-
  modules/posix/generic/CMakeLists.txt    |  2 +-
- 2 files changed, 21 insertions(+), 2 deletions(-)
+ 2 files changed, 22 insertions(+), 2 deletions(-)
 
 diff --git a/modules/posix/common/ModuleCommon.cmake b/modules/posix/common/ModuleCommon.cmake
-index fba3785..486010e 100644
+index 430b3c5..ccaeaf2 100644
 --- a/modules/posix/common/ModuleCommon.cmake
 +++ b/modules/posix/common/ModuleCommon.cmake
-@@ -27,7 +27,26 @@ else()
+@@ -27,7 +27,27 @@ else()
      set(OBJCOPY_COMMAND objcopy)
  endif()
  
@@ -31,6 +31,7 @@ index fba3785..486010e 100644
 +    COMMAND ${CMAKE_COMMAND} -E chdir ${_symcrypt_merge_workdir} ${CMAKE_AR} x $<TARGET_FILE:symcrypt_module_posix_common>
 +    COMMAND ${CMAKE_COMMAND} -E chdir ${_symcrypt_merge_workdir} ${CMAKE_AR} x $<TARGET_FILE:symcrypt_posixusermode>
 +    COMMAND ${CMAKE_COMMAND} -E chdir ${_symcrypt_merge_workdir} ${CMAKE_AR} x $<TARGET_FILE:symcrypt_common>
++    COMMAND ${CMAKE_COMMAND} -E chdir ${_symcrypt_merge_workdir} ${CMAKE_AR} x $<TARGET_FILE:symcrypt_mlkem>
 +    COMMAND ${CMAKE_COMMAND} -E chdir ${_symcrypt_merge_workdir} sh -c "${CMAKE_AR} rcs $<TARGET_FILE:${TARGET_NAME}> *.o"
 +    COMMAND ${CMAKE_COMMAND} -E rm -rf ${_symcrypt_merge_workdir}
 +    COMMENT "Merging dependency archives into $<TARGET_FILE_NAME:${TARGET_NAME}>"
@@ -41,7 +42,7 @@ index fba3785..486010e 100644
      -Wl,-all_load
      $<TARGET_FILE:symcrypt_module_posix_common>
 diff --git a/modules/posix/generic/CMakeLists.txt b/modules/posix/generic/CMakeLists.txt
-index 620977c..1e9c588 100644
+index 0b5de32..9a84cfc 100644
 --- a/modules/posix/generic/CMakeLists.txt
 +++ b/modules/posix/generic/CMakeLists.txt
 @@ -18,7 +18,7 @@ endif()
