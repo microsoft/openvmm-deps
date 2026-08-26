@@ -9,8 +9,11 @@ BUILDDIR="${BUILDDIR:-/work/tfa}"
 OUTPUTDIR="${OUTPUTDIR:-/out}"
 TFA_FLAVOR="${TFA_FLAVOR:-cca}"
 RMM_IMAGE="${RMM_IMAGE:-$PKGDIR/rmm/rmm.img}"
-PRELOADED_BL33_BASE="${PRELOADED_BL33_BASE:-0x80080000}"
+PRELOADED_BL33_BASE="${PRELOADED_BL33_BASE:-0x50080000}"
 ARM_PRELOADED_DTB_BASE="${ARM_PRELOADED_DTB_BASE:-0x40000000}"
+TFA_SOURCE_REVISION="${TFA_SOURCE_REVISION:?}"
+RMM_SOURCE_REVISION="${RMM_SOURCE_REVISION:?}"
+SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:?}"
 
 case "${TARGETARCH:-}" in
     arm64) ;;
@@ -37,6 +40,7 @@ for patch_file in "$PKGDIR/$TFA_FLAVOR"/*.patch; do
 done
 
 export CROSS_COMPILE=aarch64-none-elf-
+export SOURCE_DATE_EPOCH
 
 make -C "$src" -j"$(nproc)" \
     BUILD_BASE="$build_base" \
@@ -80,4 +84,24 @@ Linux direct boot: yes
 PRELOADED_BL33_BASE: $PRELOADED_BL33_BASE
 ARM_PRELOADED_DTB_BASE: $ARM_PRELOADED_DTB_BASE
 QEMU flash FIP offset: 0x40000
+EOF
+
+cat >"$OUTPUTDIR/manifest.txt" <<EOF
+architecture=aarch64
+bl1_sha256=$(sha256sum "$OUTPUTDIR/bl1.bin" | awk '{print $1}')
+bl2_sha256=$(sha256sum "$OUTPUTDIR/bl2.bin" | awk '{print $1}')
+bl31_sha256=$(sha256sum "$OUTPUTDIR/bl31.bin" | awk '{print $1}')
+dtb_base=$ARM_PRELOADED_DTB_BASE
+fip_sha256=$(sha256sum "$OUTPUTDIR/fip.bin" | awk '{print $1}')
+flash_fip_offset=0x40000
+flash_sha256=$(sha256sum "$OUTPUTDIR/flash.bin" | awk '{print $1}')
+flash_size=$(stat -c %s "$OUTPUTDIR/flash.bin")
+linux_as_bl33=true
+platform=qemu
+preloaded_bl33_base=$PRELOADED_BL33_BASE
+rmm_img_sha256=$(sha256sum "$RMM_IMAGE" | awk '{print $1}')
+rmm_source_revision=$RMM_SOURCE_REVISION
+source_date_epoch=$SOURCE_DATE_EPOCH
+source_revision=$TFA_SOURCE_REVISION
+toolchain=$(${CROSS_COMPILE}gcc --version | sed -n '1p')
 EOF
