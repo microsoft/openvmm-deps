@@ -28,3 +28,20 @@ RUN set -e && \
 
 FROM scratch AS output
 COPY --from=build /out/ /
+
+FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS package
+ARG VERSION
+COPY --from=output / /input/
+RUN case "$VERSION" in \
+        ""|*[!A-Za-z0-9._-]*) echo "invalid VERSION: $VERSION" >&2; exit 1 ;; \
+    esac && \
+    mkdir /package && \
+    temporary=/tmp/openvmm-test-virtio-win.tar && \
+    tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner \
+        -C /input -cf "$temporary" . && \
+    gzip -n -c "$temporary" \
+        >"/package/openvmm-test-virtio-win.$VERSION.tar.gz" && \
+    rm "$temporary"
+
+FROM scratch AS packages
+COPY --from=package /package/ /

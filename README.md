@@ -48,6 +48,17 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-test-virtio-villain.<arch>.<ver>.tar.gz`     | virtio-villain guest initramfs + `tests.tsv` |
 | `qemu-linux-static.<arch>.<ver>.tar.gz`                | static QEMU system emulators (TCG)    |
 
+Build release-shaped archives directly from the Docker graph:
+
+```bash
+docker buildx build \
+  --platform linux/arm64 \
+  --target packages-aarch64 \
+  --build-arg VERSION=<version> \
+  --output type=local,dest=out/package \
+  .
+```
+
 The `openvmm-deps` tarball no longer contains a kernel; consumers that
 need a Linux-direct boot kernel (e.g. petri's `Firmware::LinuxDirect`)
 should fetch the matching `openvmm-test-linux-<version>` artifact for
@@ -77,7 +88,11 @@ binaries for multiple guest architectures) and runs separately from the
 main cross-compilation pipeline.
 
 ```bash
-docker build -f Dockerfile.virtio-win --output type=local,dest=out .
+docker buildx build \
+  -f Dockerfile.virtio-win \
+  --target packages \
+  --build-arg VERSION=<version> \
+  --output type=local,dest=out .
 ```
 
 The output preserves the ISO's directory layout (e.g.
