@@ -52,7 +52,7 @@ Build release-shaped archives directly from the Docker graph:
 
 ```bash
 docker buildx build \
-  --platform linux/arm64 \
+  --platform aarch64 \
   --target packages-aarch64 \
   --build-arg VERSION=<version> \
   --output type=local,dest=out/package \
