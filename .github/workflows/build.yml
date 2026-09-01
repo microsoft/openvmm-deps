@@ -10,6 +10,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+env:
+  # Preserve the existing 0.3.0 release series. Increment only when
+  # intentionally starting a new series.
+  VERSION: "0.3.0-${{ github.run_number }}"
+
 jobs:
   cgmanifest:
     runs-on: ubuntu-latest
@@ -46,13 +51,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
-      - name: Build ${{ matrix.architecture }} outputs
+      - name: Build ${{ matrix.architecture }} packages
         run: |
-          target=output
+          target=packages-x86_64
           if [ "${{ matrix.architecture }}" = "aarch64" ]; then
-            target=output-aarch64
+            target=packages-aarch64
           fi
-          docker buildx build --platform "${{ matrix.architecture }}" --target "$target" --output type=local,dest=out .
+          docker buildx build \
+            --platform "${{ matrix.architecture }}" \
+            --target "$target" \
+            --build-arg VERSION="$VERSION" \
+            --output type=local,dest=out \
+            .
 
       - name: Upload artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -70,8 +80,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
-      - name: Build virtio-win
-        run: docker build -f Dockerfile.virtio-win --output type=local,dest=out .
+      - name: Build virtio-win package
+        run: |
+          docker buildx build \
+            -f Dockerfile.virtio-win \
+            --target packages \
+            --build-arg VERSION="$VERSION" \
+            --output type=local,dest=out \
+            .
 
       - name: Upload artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -91,59 +107,12 @@ jobs:
         with:
           path: out
 
-      - name: Build package
-        run: |
-          cd out
-          mkdir package
-          VERSION="0.3.0-${{ github.run_number }}"
-          # To add a new test kernel, extend KERNELS below and follow the
-          # `## Adding a new kernel version` recipe in pkg/linux/README.md
-          # (new src-/build-/result- Dockerfile stages, sysroots/linux-<ver>/deps,
-          # configs, cgmanifest refresh).
-          KERNELS="6.1 6.18"
-          AARCH64_KERNELS="kvm-cca-dev"
-          AARCH64_RMMS="cca"
-          AARCH64_TFAS="cca"
-          for arch in x86_64 aarch64; do
-            tar cvzf "package/openvmm-deps.$arch.$VERSION.tar.gz" \
-              -C "$arch/openvmm-deps" .
-            tar cvzf "package/openvmm-test-initrd.$arch.$VERSION.tar.gz" \
-              -C "$arch/initrd" .
-            arch_kernels="$KERNELS"
-            if [ "$arch" = "aarch64" ]; then
-              arch_kernels="$arch_kernels $AARCH64_KERNELS"
-            fi
-            for kver in $arch_kernels; do
-              tar cvzf "package/openvmm-test-linux-$kver.$arch.$VERSION.tar.gz" \
-                -C "$arch/linux-$kver" .
-            done
-            if [ "$arch" = "aarch64" ]; then
-              for rver in $AARCH64_RMMS; do
-                tar cvzf "package/openvmm-test-rmm-$rver.$arch.$VERSION.tar.gz" \
-                  -C "$arch/rmm-$rver" .
-              done
-              for tver in $AARCH64_TFAS; do
-                tar cvzf "package/openvmm-test-tfa-$tver.$arch.$VERSION.tar.gz" \
-                  -C "$arch/tfa-$tver" .
-              done
-            fi
-            tar cvzf "package/qemu-linux-static.$arch.$VERSION.tar.gz" \
-              -C "$arch/qemu" .
-            # virtio-villain guest binaries (both arches).
-            tar cvzf "package/openvmm-test-virtio-villain.$arch.$VERSION.tar.gz" \
-              -C "$arch/virtio-villain" .
-          done
-          # virtio-win is arch-independent (Windows PE binaries).
-          tar cvzf "package/openvmm-test-virtio-win.$VERSION.tar.gz" \
-            -C virtio-win .
-
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: "0.3.0-${{ github.run_number }}"
         run: |
           gh release create "$VERSION" \
             --title "$VERSION" \
             --generate-notes \
             --repo "$GITHUB_REPOSITORY" \
-            out/package/*.tar.gz
+            out/*/*.tar.gz

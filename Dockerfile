@@ -295,5 +295,61 @@ COPY --from=result-linux-kvm-cca-dev --link / /linux-kvm-cca-dev/
 COPY --from=result-rmm-cca --link / /rmm-cca/
 COPY --from=result-tfa-cca --link / /tfa-cca/
 
+# Package the output directories into the exact archives uploaded by the
+# release workflow. Keep packaging inside the Docker graph so PR and release
+# builds use the same immutable inputs.
+FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS package-x86_64
+ARG VERSION
+COPY --from=output-base --link / /input/
+RUN case "$VERSION" in \
+        ""|*[!A-Za-z0-9._-]*) echo "invalid VERSION: $VERSION" >&2; exit 1 ;; \
+    esac && \
+    mkdir /package && \
+    archive() { \
+        name=$1; source=$2; \
+        temporary="/tmp/${name%.gz}"; \
+        tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner \
+            -C "$source" -cf "$temporary" . && \
+        gzip -n -c "$temporary" >"/package/$name" && \
+        rm "$temporary"; \
+    } && \
+    archive "openvmm-deps.x86_64.$VERSION.tar.gz" /input/openvmm-deps && \
+    archive "openvmm-test-initrd.x86_64.$VERSION.tar.gz" /input/initrd && \
+    archive "openvmm-test-linux-6.1.x86_64.$VERSION.tar.gz" /input/linux-6.1 && \
+    archive "openvmm-test-linux-6.18.x86_64.$VERSION.tar.gz" /input/linux-6.18 && \
+    archive "qemu-linux-static.x86_64.$VERSION.tar.gz" /input/qemu && \
+    archive "openvmm-test-virtio-villain.x86_64.$VERSION.tar.gz" /input/virtio-villain
+FROM scratch AS packages-x86_64
+COPY --from=package-x86_64 --link /package/ /
+
+FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS package-aarch64
+ARG VERSION
+COPY --from=output-aarch64 --link / /input/
+RUN case "$VERSION" in \
+        ""|*[!A-Za-z0-9._-]*) echo "invalid VERSION: $VERSION" >&2; exit 1 ;; \
+    esac && \
+    mkdir /package && \
+    archive() { \
+        name=$1; source=$2; \
+        temporary="/tmp/${name%.gz}"; \
+        tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner \
+            -C "$source" -cf "$temporary" . && \
+        gzip -n -c "$temporary" >"/package/$name" && \
+        rm "$temporary"; \
+    } && \
+    archive "openvmm-deps.aarch64.$VERSION.tar.gz" /input/openvmm-deps && \
+    archive "openvmm-test-initrd.aarch64.$VERSION.tar.gz" /input/initrd && \
+    archive "openvmm-test-linux-6.1.aarch64.$VERSION.tar.gz" /input/linux-6.1 && \
+    archive "openvmm-test-linux-6.18.aarch64.$VERSION.tar.gz" /input/linux-6.18 && \
+    archive "openvmm-test-linux-kvm-cca-dev.aarch64.$VERSION.tar.gz" \
+        /input/linux-kvm-cca-dev && \
+    archive "openvmm-test-rmm-cca.aarch64.$VERSION.tar.gz" /input/rmm-cca && \
+    archive "openvmm-test-tfa-cca.aarch64.$VERSION.tar.gz" /input/tfa-cca && \
+    archive "qemu-linux-static.aarch64.$VERSION.tar.gz" /input/qemu && \
+    archive "openvmm-test-virtio-villain.aarch64.$VERSION.tar.gz" /input/virtio-villain
+FROM scratch AS packages-aarch64
+COPY --from=package-aarch64 --link /package/ /
+
+# Keep the unpacked output as the default target for local `docker build`.
 FROM scratch AS output
 COPY --from=output-base       --link / /
