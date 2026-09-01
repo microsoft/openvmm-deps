@@ -59,8 +59,9 @@ docker buildx build \
   .
 ```
 
-Plain `docker build` commands continue to export the unpacked output layout.
-Select a `packages-*` target only when release-shaped archives are required.
+The default final stage remains the unpacked `output` layout. Select a
+`packages-x86_64` or `packages-aarch64` target only when release-shaped
+archives are required.
 
 The `openvmm-deps` tarball no longer contains a kernel; consumers that
 need a Linux-direct boot kernel (e.g. petri's `Firmware::LinuxDirect`)
@@ -93,15 +94,23 @@ main cross-compilation pipeline.
 ```bash
 docker buildx build \
   -f Dockerfile.virtio-win \
+  --output type=local,dest=out .
+```
+
+This output preserves the ISO's directory layout (e.g.
+`NetKVM/2k22/amd64/`, `NetKVM/2k25/ARM64/`). To build the release-shaped
+archive instead:
+
+```bash
+docker buildx build \
+  -f Dockerfile.virtio-win \
   --target packages \
   --build-arg VERSION=<version> \
   --output type=local,dest=out .
 ```
 
-The output preserves the ISO's directory layout (e.g.
-`NetKVM/2k22/amd64/`, `NetKVM/2k25/ARM64/`). Currently only NetKVM
-drivers are extracted; to add more driver families, extend the `grep`
-filter in `Dockerfile.virtio-win`.
+Currently only NetKVM drivers are extracted; to add more driver families,
+extend the `grep` filter in `Dockerfile.virtio-win`.
 
 The ISO is mirrored to the
 [`virtio-iso-v1`](https://github.com/microsoft/openvmm-deps/releases/tag/virtio-iso-v1)
