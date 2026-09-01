@@ -59,6 +59,9 @@ docker buildx build \
   .
 ```
 
+Plain `docker build` commands continue to export the unpacked output layout.
+Select a `packages-*` target only when release-shaped archives are required.
+
 The `openvmm-deps` tarball no longer contains a kernel; consumers that
 need a Linux-direct boot kernel (e.g. petri's `Firmware::LinuxDirect`)
 should fetch the matching `openvmm-test-linux-<version>` artifact for

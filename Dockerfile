@@ -295,15 +295,12 @@ COPY --from=result-linux-kvm-cca-dev --link / /linux-kvm-cca-dev/
 COPY --from=result-rmm-cca --link / /rmm-cca/
 COPY --from=result-tfa-cca --link / /tfa-cca/
 
-FROM scratch AS output
-COPY --from=output-base       --link / /
-
 # Package the output directories into the exact archives uploaded by the
 # release workflow. Keep packaging inside the Docker graph so PR and release
 # builds use the same immutable inputs.
 FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS package-x86_64
 ARG VERSION
-COPY --from=output --link / /input/
+COPY --from=output-base --link / /input/
 RUN case "$VERSION" in \
         ""|*[!A-Za-z0-9._-]*) echo "invalid VERSION: $VERSION" >&2; exit 1 ;; \
     esac && \
@@ -352,3 +349,7 @@ RUN case "$VERSION" in \
     archive "openvmm-test-virtio-villain.aarch64.$VERSION.tar.gz" /input/virtio-villain
 FROM scratch AS packages-aarch64
 COPY --from=package-aarch64 --link /package/ /
+
+# Keep the unpacked output as the default target for local `docker build`.
+FROM scratch AS output
+COPY --from=output-base       --link / /
