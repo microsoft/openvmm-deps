@@ -12,4 +12,5 @@ pkg/libunwind
 pkg/openssl3
 pkg/symcrypt
 pkg/ms_tpm_20_ref
+pkg/ms_tcg_tpm_sys
 pkg/mimalloc

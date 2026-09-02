@@ -104,6 +104,12 @@ ADD --link https://github.com/microsoft/ms-tpm-20-ref-rs.git#9a24154df7b09cd1a0b
 # ms-tpm-20-ref (pinned by commit)
 FROM scratch AS src-ms-tpm-20-ref
 ADD --link https://github.com/microsoft/ms-tpm-20-ref.git#2d5660ac249293dcbaed192c70ca208d321ebf5b /
+# ms-tcg-tpm-sys (pinned by commit)
+FROM scratch AS src-ms-tcg-tpm-sys
+ADD --link https://github.com/microsoft/ms-tcg-tpm-sys.git#f694267cb5d178e7d0c7203f74fa00c738145343 /
+# TCG TPM (pinned by commit)
+FROM scratch AS src-tcg-tpm
+ADD --link https://github.com/TrustedComputingGroup/TPM.git#bc29a21d44b01396223c152a4834e52318591770 /
 # mimalloc v2.2.4 (matches the bundled version in libmimalloc-sys 0.1.44 / mimalloc 0.1.48)
 FROM scratch AS src-mimalloc
 ADD --unpack --checksum=sha256:754a98de5e2912fddbeaf24830f982b4540992f1bab4a0a8796ee118e0752bda --link https://github.com/microsoft/mimalloc/archive/refs/tags/v2.2.4.tar.gz /
@@ -150,6 +156,8 @@ RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
     --mount=type=bind,from=src-symcrypt,source=/,target=/pkg/symcrypt/src,rw \
     --mount=type=bind,from=src-ms-tpm-20-ref-rs,source=/,target=/pkg/ms_tpm_20_ref/src,rw \
     --mount=type=bind,from=src-ms-tpm-20-ref,source=/,target=/pkg/ms_tpm_20_ref/src/ms-tpm-20-ref,rw \
+    --mount=type=bind,from=src-ms-tcg-tpm-sys,source=/,target=/pkg/ms_tcg_tpm_sys/src,rw \
+    --mount=type=bind,from=src-tcg-tpm,source=/,target=/pkg/ms_tcg_tpm_sys/src/TPM,rw \
     --mount=type=bind,from=src-mimalloc,source=/mimalloc-2.2.4,target=/pkg/mimalloc/src \
     /pkg/Tools/build.sh sysroots/sdk
 FROM scratch AS result-sdk
