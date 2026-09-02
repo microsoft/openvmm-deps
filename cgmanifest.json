@@ -182,6 +182,24 @@
     },
     {
       "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/microsoft/ms-tcg-tpm-sys",
+          "commitHash": "f694267cb5d178e7d0c7203f74fa00c738145343"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/TrustedComputingGroup/TPM",
+          "commitHash": "bc29a21d44b01396223c152a4834e52318591770"
+        }
+      }
+    },
+    {
+      "component": {
         "type": "other",
         "other": {
           "name": "mimalloc",
