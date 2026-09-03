@@ -1,6 +1,4 @@
-#!/bin/sh
-
-set -e
+#!/bin/bash
 
 # Build the TCG TPM archives by invoking `ms-tcg-tpm-sys`'s own `build.rs`
 # via cargo, so the CMake configuration, crypto backend selection, and
@@ -13,15 +11,14 @@ set -e
 # The crate links against exactly one crypto backend at a time, so it gets
 # built once per backend. Consumers pick one by pointing `TCG_TPM_LIB_DIR`
 # at the matching directory.
-cd "$SRCDIR"
-
-# Where `pkg/symcrypt` installed its static build.
-export SYMCRYPT_INCLUDE_DIR="$SYSROOT/include"
-export SYMCRYPT_LIB_DIR="$SYSROOT/lib"
 
 # Build the TPM against one crypto backend and install the result into
 # `$SYSROOT/<name>/lib`.
-build_backend() {
+build_backend() (
+    set -e
+
+    cd "$SRCDIR"
+
     name="$1"
     shift
 
@@ -44,7 +41,13 @@ build_backend() {
 
     install -d "$SYSROOT/$name/lib"
     install -m 644 "$libdir"/libTpm_*.a "$SYSROOT/$name/lib/"
-}
+)
 
-build_backend tcg-tpm-openssl --features openssl
-# build_backend tcg-tpm-symcrypt --features symcrypt
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+    # Where `pkg/symcrypt` installed its static build.
+    export SYMCRYPT_INCLUDE_DIR="${SYMCRYPT_INCLUDE_DIR:-$SYSROOT/include}"
+    export SYMCRYPT_LIB_DIR="${SYMCRYPT_LIB_DIR:-$SYSROOT/lib}"
+
+    build_backend tcg-tpm-openssl --features openssl
+    # build_backend tcg-tpm-symcrypt --features symcrypt
+fi
