@@ -167,7 +167,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://github.com/microsoft/ms-tpm-20-ref-rs",
-          "commitHash": "fd4eb893a4fa0f68bd5cae3d5e7185161e21d85f"
+          "commitHash": "9a24154df7b09cd1a0b90f25a7bf9cbb16e24c7d"
         }
       }
     },
@@ -185,7 +185,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://github.com/microsoft/ms-tcg-tpm-sys",
-          "commitHash": "f694267cb5d178e7d0c7203f74fa00c738145343"
+          "commitHash": "fd4eb893a4fa0f68bd5cae3d5e7185161e21d85f"
         }
       }
     },
