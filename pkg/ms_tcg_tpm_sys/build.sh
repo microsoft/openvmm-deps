@@ -15,11 +15,6 @@ set -e
 # at the matching directory.
 cd "$SRCDIR"
 
-# `build.rs` runs `nm` / `objcopy` over the archives it just built, so it
-# needs the cross binutils rather than the host's.
-export TCG_TPM_OBJCOPY="$ARCH-linux-musl-objcopy"
-export TCG_TPM_NM="$ARCH-linux-musl-nm"
-
 # Where `pkg/symcrypt` installed its static build.
 export SYMCRYPT_INCLUDE_DIR="$SYSROOT/include"
 export SYMCRYPT_LIB_DIR="$SYSROOT/lib"
