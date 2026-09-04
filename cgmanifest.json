@@ -130,7 +130,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://gitlab.arm.com/linux-arm/linux-cca",
-          "commitHash": "f4e94cc01f1bc874ab35a47d308530cb58231d74"
+          "commitHash": "4ddbc65b5b408c37605110166a8da19f4dd0e180"
         }
       }
     },
@@ -226,7 +226,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://github.com/TF-RMM/tf-rmm",
-          "commitHash": "a2be2c263a77e2ccefd2f47f2f621721e93bea46"
+          "commitHash": "f00eac344b6f7c18abc6dad1948b07e9a82ff9f0"
         }
       }
     },

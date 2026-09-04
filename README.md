@@ -26,7 +26,7 @@ out/
   initrd/              shared busybox-based test rootfs (cpio.gz)
   linux-6.1/           vmlinux, bzImage/Image, config (kernel only)
   linux-6.18/          vmlinux, bzImage/Image, config (kernel only)
-  linux-kvm-cca-dev/     vmlinux, Image, config (aarch64 output only)
+  linux-cca-v15/         vmlinux, Image, config, manifest (aarch64 output only)
   rmm-cca/             rmm.img and debug artifacts (aarch64 output only)
   tfa-cca/             flash.bin and debug artifacts (aarch64 output only)
   qemu/                qemu-system-aarch64, qemu-system-x86_64
@@ -41,7 +41,7 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-test-initrd.<arch>.<ver>.tar.gz`             | shared initrd (used with any kernel)  |
 | `openvmm-test-linux-6.1.<arch>.<ver>.tar.gz`          | 6.1 LTS kernel images + final config  |
 | `openvmm-test-linux-6.18.<arch>.<ver>.tar.gz`         | 6.18 kernel images + final config     |
-| `openvmm-test-linux-kvm-cca-dev.aarch64.<ver>.tar.gz`     | v14 Arm CCA host kernel images + final config |
+| `openvmm-test-linux-cca-v15.aarch64.<ver>.tar.gz`         | unified v15 Arm CCA host, guest, and VFIO/P2P test kernel |
 | `openvmm-test-rmm-cca.aarch64.<ver>.tar.gz`             | TF-RMM firmware for QEMU virt CCA tests |
 | `openvmm-test-tfa-cca.aarch64.<ver>.tar.gz`             | TF-A firmware for Linux-direct QEMU virt CCA tests |
 | `openvmm-test-virtio-win.<ver>.tar.gz`                | virtio-win NetKVM drivers (all OS/arch)|

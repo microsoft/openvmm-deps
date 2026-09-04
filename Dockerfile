@@ -85,9 +85,9 @@ ADD --link https://github.com/gregkh/linux.git#ad16b162f21d970235ced0c7e36e960c2
 # linux v6.18.33 (linux-6.18.y)
 FROM scratch AS src-linux-6.18
 ADD --link https://github.com/gregkh/linux.git#83657f4189612e5cbcabc3058acd36c0bd120729 /
-# linux v7.1-rc1 with the KVM CCA v14 patchset
-FROM scratch AS src-linux-kvm-cca-dev
-ADD --link https://gitlab.arm.com/linux-arm/linux-cca.git#f4e94cc01f1bc874ab35a47d308530cb58231d74 /
+# linux v7.2-rc1 with the KVM CCA v15 patchset
+FROM scratch AS src-linux-cca-v15
+ADD --link https://gitlab.arm.com/linux-arm/linux-cca.git#4ddbc65b5b408c37605110166a8da19f4dd0e180 /
 # llvm-project (release/17.x) -- used by libunwind and sdk
 FROM scratch AS src-llvm
 ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb6a803753fe18 /
@@ -116,9 +116,9 @@ ADD --unpack --checksum=sha256:754a98de5e2912fddbeaf24830f982b4540992f1bab4a0a87
 # qemu (v11.0.1)
 FROM scratch AS src-qemu
 ADD --unpack --checksum=sha256:b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39 --link https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz /
-# TF-RMM integration branch, tested with the KVM CCA v14 patchset.
+# TF-RMM v2 integration branch, tested with the KVM CCA v15 patchset.
 FROM scratch AS src-tf-rmm-cca
-ADD --keep-git-dir=true --link https://github.com/TF-RMM/tf-rmm.git#a2be2c263a77e2ccefd2f47f2f621721e93bea46 /
+ADD --keep-git-dir=true --link https://github.com/TF-RMM/tf-rmm.git#f00eac344b6f7c18abc6dad1948b07e9a82ff9f0 /
 # TF-A v2.15.0, used to load TF-RMM and Linux-direct BL33.
 FROM scratch AS src-tfa-cca
 ADD --keep-git-dir=true --link https://github.com/TrustedFirmware-A/trusted-firmware-a.git#da738d5eae93af342fdc4995dd3c05acb4c9d757 /
@@ -205,11 +205,11 @@ RUN --mount=type=bind,from=src-linux-6.18,source=/,target=/pkg/linux/src \
 FROM scratch AS result-linux-6.18
 COPY --from=build-linux-6.18 --link /sysroot/boot /
 
-FROM --platform=$BUILDPLATFORM package-builder AS build-linux-kvm-cca-dev
-RUN --mount=type=bind,from=src-linux-kvm-cca-dev,source=/,target=/pkg/linux/src,rw \
-    /pkg/Tools/build.sh sysroots/linux-kvm-cca-dev
-FROM scratch AS result-linux-kvm-cca-dev
-COPY --from=build-linux-kvm-cca-dev --link /sysroot/boot /
+FROM --platform=$BUILDPLATFORM package-builder AS build-linux-cca-v15
+RUN --mount=type=bind,from=src-linux-cca-v15,source=/,target=/pkg/linux/src \
+    /pkg/Tools/build.sh sysroots/linux-cca-v15
+FROM scratch AS result-linux-cca-v15
+COPY --from=build-linux-cca-v15 --link /sysroot/boot /
 
 FROM --platform=$BUILDPLATFORM package-builder AS result-libunwind
 RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
@@ -260,7 +260,11 @@ RUN --mount=type=bind,from=src-tf-rmm-cca,source=/,target=/pkg/rmm/src \
     --mount=type=bind,from=src-tf-rmm-qcbor,source=/,target=/pkg/rmm/submodules/qcbor \
     --mount=type=bind,from=src-tf-rmm-spdm-emu,source=/,target=/pkg/rmm/submodules/spdm-emu \
     --mount=type=bind,from=src-tf-rmm-t-cose,source=/,target=/pkg/rmm/submodules/t_cose \
-    RMM_FLAVOR=cca RMM_CONFIG=qemu_virt_defcfg /pkg/rmm/build.sh
+    RMM_FLAVOR=cca \
+    RMM_CONFIG=qemu_virt_defcfg \
+    RMM_SOURCE_REVISION=f00eac344b6f7c18abc6dad1948b07e9a82ff9f0 \
+    SOURCE_DATE_EPOCH=1783958488 \
+    /pkg/rmm/build.sh
 FROM scratch AS result-rmm-cca
 COPY --from=build-rmm-cca --link /out/ /
 
@@ -272,7 +276,11 @@ COPY --link pkg/tfa /pkg/tfa
 FROM --platform=$BUILDPLATFORM tfa-builder AS build-tfa-cca
 RUN --mount=type=bind,from=src-tfa-cca,source=/,target=/pkg/tfa/src \
     --mount=type=bind,from=result-rmm-cca,source=/,target=/pkg/tfa/rmm \
-    TFA_FLAVOR=cca /pkg/tfa/build.sh
+    TFA_FLAVOR=cca \
+    TFA_SOURCE_REVISION=da738d5eae93af342fdc4995dd3c05acb4c9d757 \
+    RMM_SOURCE_REVISION=f00eac344b6f7c18abc6dad1948b07e9a82ff9f0 \
+    SOURCE_DATE_EPOCH=1779985789 \
+    /pkg/tfa/build.sh
 FROM scratch AS result-tfa-cca
 COPY --from=build-tfa-cca --link /out/ /
 
@@ -299,7 +307,7 @@ COPY --from=result-virtio-villain --link / /virtio-villain/
 
 FROM scratch AS output-aarch64
 COPY --from=output-base       --link / /
-COPY --from=result-linux-kvm-cca-dev --link / /linux-kvm-cca-dev/
+COPY --from=result-linux-cca-v15 --link / /linux-cca-v15/
 COPY --from=result-rmm-cca --link / /rmm-cca/
 COPY --from=result-tfa-cca --link / /tfa-cca/
 
@@ -349,8 +357,8 @@ RUN case "$VERSION" in \
     archive "openvmm-test-initrd.aarch64.$VERSION.tar.gz" /input/initrd && \
     archive "openvmm-test-linux-6.1.aarch64.$VERSION.tar.gz" /input/linux-6.1 && \
     archive "openvmm-test-linux-6.18.aarch64.$VERSION.tar.gz" /input/linux-6.18 && \
-    archive "openvmm-test-linux-kvm-cca-dev.aarch64.$VERSION.tar.gz" \
-        /input/linux-kvm-cca-dev && \
+    archive "openvmm-test-linux-cca-v15.aarch64.$VERSION.tar.gz" \
+        /input/linux-cca-v15 && \
     archive "openvmm-test-rmm-cca.aarch64.$VERSION.tar.gz" /input/rmm-cca && \
     archive "openvmm-test-tfa-cca.aarch64.$VERSION.tar.gz" /input/tfa-cca && \
     archive "qemu-linux-static.aarch64.$VERSION.tar.gz" /input/qemu && \
