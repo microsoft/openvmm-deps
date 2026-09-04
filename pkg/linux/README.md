@@ -8,7 +8,7 @@ The build is structured to support multiple kernel lines side-by-side.
 Today **6.1** (LTS), **6.18**, and **cca-v15** ship; additional lines can be
 added purely additively (see "Adding a new kernel version" below). The CCA line
 is Arm-only and
-ship for `aarch64` only. Each kernel
+ships for `aarch64` only. Each kernel
 is published as its own GitHub release artifact
 (`openvmm-test-linux-<version>.<arch>.<release>.tar.gz`) containing the
 kernel images and final config. The initrd is shared across all kernels
