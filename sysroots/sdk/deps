@@ -4,9 +4,9 @@
 CFLAGS=-fstack-protector-strong -D_FORTIFY_SOURCE=2 -z noexecstack -fpic -Wl,-z,relro -Wl,-z,now -Wformat -Wformat-security -Werror=format-security -fstack-clash-protection
 CXXFLAGS=$CFLAGS
 
-# Disable FPO to get better debug output.
-CFLAGS=$CFLAGS -fno-omit-frame-pointer -Os
-CXXFLAGS=$CXXFLAGS -fno-omit-frame-pointer -Os
+# Optimize for size and omit unwind tables for more size, but retain frame pointers for debuggability.
+CFLAGS=$CFLAGS -Os -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-omit-frame-pointer 
+CXXFLAGS=$CXXFLAGS -Os -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-omit-frame-pointer
 
 pkg/libunwind
 pkg/openssl3
