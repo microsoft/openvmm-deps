@@ -26,6 +26,7 @@ build_backend() (
     # stay trivially distinguishable below.
     CARGO_TARGET_DIR="$BUILDDIR/target-$name"
     export CARGO_TARGET_DIR
+    # Dev Note: The crate's build.rs ignores our global -Os and specifies its own -O level.
     cargo check --release --locked -p ms-tcg-tpm-sys --no-default-features "$@"
 
     # `build.rs` collects the TPM library's own archives under

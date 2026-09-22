@@ -7,6 +7,7 @@ cd $SRCDIR
 # Copy headers before build to avoid picking up generated outputs we don't want
 cp inc/*.h $SYSROOT/include/
 
+# Dev Note: RelWithDebInfo overrides our global -Os with -O2
 cmake -S "$SRCDIR" -B out -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSYMCRYPT_FIPS_BUILD=OFF -DSYMCRYPT_UNIT_TESTS=OFF
 cmake --build out -j --target symcrypt_generic_posix
 

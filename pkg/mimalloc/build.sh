@@ -16,6 +16,8 @@ AR="${AR:-$ARCH-linux-musl-ar}"
 # Match libmimalloc-sys: include the public + private mimalloc headers,
 # disable debug asserts (release build), silence date-time warnings, and
 # use the `initial-exec` TLS model.
+# Dev Note: Deliberately overriding our global -Os with -O2 for this perf
+# critical component.
 MI_CFLAGS="\
     -I${SRCDIR}/include \
     -I${SRCDIR}/src \
