@@ -5,9 +5,9 @@ CFLAGS=-fstack-protector-strong -D_FORTIFY_SOURCE=2 -z noexecstack -fpic -Wl,-z,
 CXXFLAGS=$CFLAGS
 
 # Optimize for size and omit unwind tables for more size, but retain frame pointers for debuggability.
-CFLAGS=$CFLAGS -Os -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-omit-frame-pointer 
-CXXFLAGS=$CXXFLAGS -Os -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-omit-frame-pointer
-
+CFLAGS=$CFLAGS -Os -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-omit-frame-pointer -g
+CXXFLAGS=$CXXFLAGS -Os -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-omit-frame-pointer -g
+    
 pkg/libunwind
 pkg/openssl3
 pkg/symcrypt
