@@ -106,7 +106,7 @@ FROM scratch AS src-ms-tpm-20-ref
 ADD --link https://github.com/microsoft/ms-tpm-20-ref.git#2d5660ac249293dcbaed192c70ca208d321ebf5b /
 # ms-tcg-tpm-sys (pinned by commit)
 FROM scratch AS src-ms-tcg-tpm-sys
-ADD --link https://github.com/microsoft/ms-tcg-tpm-sys.git#259c64582d942e70bbd8a575f08e41a2eef85852 /
+ADD --link https://github.com/microsoft/ms-tcg-tpm-sys.git#517ae1a64aeb990019d809b963ac2c2726080e24 /
 # TCG TPM (pinned by commit)
 FROM scratch AS src-tcg-tpm
 ADD --link https://github.com/TrustedComputingGroup/TPM.git#bc29a21d44b01396223c152a4834e52318591770 /
