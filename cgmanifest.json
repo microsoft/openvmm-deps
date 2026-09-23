@@ -185,7 +185,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://github.com/microsoft/ms-tcg-tpm-sys",
-          "commitHash": "259c64582d942e70bbd8a575f08e41a2eef85852"
+          "commitHash": "517ae1a64aeb990019d809b963ac2c2726080e24"
         }
       }
     },
