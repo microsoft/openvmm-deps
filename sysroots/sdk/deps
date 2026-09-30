@@ -1,7 +1,7 @@
 # The SDK for building openvmm
 
 # Security-related flags.
-CFLAGS=-fstack-protector-strong -D_FORTIFY_SOURCE=2 -z noexecstack -fpic -Wl,-z,relro -Wl,-z,now -Wformat -Wformat-security -Werror=format-security -fstack-clash-protection
+CFLAGS=-fstack-protector-strong -D_FORTIFY_SOURCE=2 -z noexecstack -fPIC -Wl,-z,relro -Wl,-z,now -Wformat -Wformat-security -Werror=format-security -fstack-clash-protection
 CXXFLAGS=$CFLAGS
 
 # Optimize for size and omit unwind tables for more size, but retain frame pointers for debuggability.
