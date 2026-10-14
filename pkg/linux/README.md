@@ -34,7 +34,6 @@ pkg/linux/
   snp-guest/
     x86_64.config         # SEV-SNP guest kernel / x86_64
     required.config       # Settings the SNP guest boot needs
-    patches/              # SNP guest patches applied to the source
   mshv-host/
     x86_64.config         # MSHV root-partition host kernel / x86_64
     required.config       # Settings the Azure MSHV host needs
@@ -68,27 +67,21 @@ configuration. The same image supports QEMU and FVP L1 hosts, nested Realm
 guests, and the generic AArch64 TCG VFIO/P2P tests.
 
 The **snp-guest** line is the L2 guest kernel for OpenVMM tests on MSHV with
-SEV-SNP. It builds the stable `v6.18.53` tag. Its config seed is
-`Microsoft/configs/x86/uvm_defconfig` from the Azure Linux kata-uvm tag
-`rolling-lts/kata-uvm/6.18.52.mshv1` (commit `ce4c4c2d`) in
+SEV-SNP. It builds the Azure Linux tag
+`rolling-lts/kata-uvm/6.18.52.mshv2` (commit `63eba05d`) in
 [CBL-Mariner-Linux-Kernel](https://github.com/microsoft/CBL-Mariner-Linux-Kernel),
-resolved by this build. The patches come from the
-[`snp-6.18-guest-unregister`](https://github.com/chris-oo/CBL-Mariner-Linux-Kernel/tree/snp-6.18-guest-unregister)
-branch, rebased onto `v6.18.53`:
-
-| Patch | Upstream commit | Purpose |
-|---|---|---|
-| `0001` | `8e6fbce7` | Unregister the decompressor GHCB before making its page private. |
-| `0002` | `a8b36965` | Enable x2APIC early, before the boot CPU APIC ID is read. |
-| `0003` | `6e82e92b` | Allocate hypercall output pages for SNP AP startup. |
+with a config based on `Microsoft/configs/x86/uvm_defconfig`, resolved by this
+build. The tag includes the GHCB unregister, early x2APIC, and SNP AP
+output-page fixes, so this line needs no local patches.
 
 Boot-critical settings in `required.config` must stay built in, because the
 artifact does not ship modules.
 
 The **mshv-host** line is the L1 kernel for Azure Linux Dom0 test runners,
-built from commit
-[`f10394f7`](https://github.com/microsoft/CBL-Mariner-Linux-Kernel/commit/f10394f7b07d5a1ee469fc3b85249d3bcdeee193)
-with its `Microsoft/configs/x86/mshv_defconfig`.
+built from the Azure Linux tag `rolling-lts/kata/6.18.34.mshv4` (commit
+[`e72bb1d3`](https://github.com/microsoft/CBL-Mariner-Linux-Kernel/commit/e72bb1d3ea93dea7891303c58c71e1a6d5ef6da0))
+with its `Microsoft/configs/x86/mshv_defconfig`. The tag includes the SNP
+interrupt injection policy and unmap-before-reclaim fixes.
 
 The line sets `LINUX_MODULES=1`, so the artifact includes signed modules
 under `lib/modules/<release>/`. Install the kernel and modules on the runner,
