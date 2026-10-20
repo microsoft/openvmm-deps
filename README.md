@@ -48,7 +48,7 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-test-linux-mshv-host.x86_64.<ver>.tar.gz`    | MSHV root-partition host kernel and modules |
 | `openvmm-test-rmm-cca.aarch64.<ver>.tar.gz`             | TF-RMM firmware for QEMU virt CCA tests |
 | `openvmm-test-tfa-cca.aarch64.<ver>.tar.gz`             | TF-A firmware for Linux-direct QEMU virt CCA tests |
-| `openvmm-test-virtio-win.<ver>.tar.gz`                | virtio-win NetKVM drivers (all OS/arch)|
+| `openvmm-test-virtio-win.<ver>.tar.gz`                | virtio-win NetKVM and viostor drivers (all OS/arch) |
 | `openvmm-test-virtio-villain.<arch>.<ver>.tar.gz`     | virtio-villain guest initramfs + `tests.tsv` |
 | `qemu-linux-static.<arch>.<ver>.tar.gz`                | static QEMU system emulators (TCG)    |
 
@@ -104,8 +104,8 @@ docker buildx build \
 ```
 
 This output preserves the ISO's directory layout (e.g.
-`NetKVM/2k22/amd64/`, `NetKVM/2k25/ARM64/`). To build the release-shaped
-archive instead:
+`NetKVM/2k22/amd64/`, `NetKVM/2k25/ARM64/`, and `viostor/2k22/amd64/`).
+To build the release-shaped archive instead:
 
 ```bash
 docker buildx build \
@@ -115,8 +115,11 @@ docker buildx build \
   --output type=local,dest=out .
 ```
 
-Currently only NetKVM drivers are extracted; to add more driver families,
-extend the `grep` filter in `Dockerfile.virtio-win`.
+NetKVM (virtio-net) and viostor (virtio-blk) drivers are extracted for all
+OS versions and architectures present in the ISO. PDB and README files are
+excluded. The build checks that both drivers include nonempty INF, SYS, and
+CAT files for Windows Server 2022 x64. To add more driver families, extend
+the `grep` filter in `Dockerfile.virtio-win`.
 
 The ISO is mirrored to the
 [`virtio-iso-v1`](https://github.com/microsoft/openvmm-deps/releases/tag/virtio-iso-v1)
