@@ -29,6 +29,7 @@ out/
   linux-cca-v15/         vmlinux, Image, config, manifest (aarch64 output only)
   linux-snp-guest/     vmlinux, bzImage, config, manifest (x86_64 output only)
   linux-mshv-host/     vmlinux, bzImage, config, manifest, lib/modules (x86_64 output only)
+  linux-mshv-test/     vmlinux, bzImage, config, manifest (x86_64 output only)
   rmm-cca/             rmm.img and debug artifacts (aarch64 output only)
   tfa-cca/             flash.bin and debug artifacts (aarch64 output only)
   qemu/                qemu-system-aarch64, qemu-system-x86_64
@@ -46,6 +47,7 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-test-linux-cca-v15.aarch64.<ver>.tar.gz`         | unified v15 Arm CCA host, guest, and VFIO/P2P test kernel |
 | `openvmm-test-linux-snp-guest.x86_64.<ver>.tar.gz`    | SEV-SNP guest kernel for OpenVMM MSHV tests |
 | `openvmm-test-linux-mshv-host.x86_64.<ver>.tar.gz`    | MSHV root-partition host kernel and modules |
+| `openvmm-test-linux-mshv-test.x86_64.<ver>.tar.gz`    | Module-free mshv root kernel for Incubator and nested Petri tests |
 | `openvmm-test-rmm-cca.aarch64.<ver>.tar.gz`             | TF-RMM firmware for QEMU virt CCA tests |
 | `openvmm-test-tfa-cca.aarch64.<ver>.tar.gz`             | TF-A firmware for Linux-direct QEMU virt CCA tests |
 | `openvmm-test-virtio-win.<ver>.tar.gz`                | virtio-win NetKVM drivers (all OS/arch)|

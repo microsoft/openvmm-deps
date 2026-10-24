@@ -230,6 +230,12 @@ RUN --mount=type=bind,from=src-linux-mshv-host,source=/,target=/pkg/linux/src \
 FROM scratch AS result-linux-mshv-host
 COPY --from=build-linux-mshv-host --link /sysroot/boot /
 
+FROM --platform=$BUILDPLATFORM package-builder AS build-linux-mshv-test
+RUN --mount=type=bind,from=src-linux-mshv-host,source=/,target=/pkg/linux/src,rw \
+    /pkg/Tools/build.sh sysroots/linux-mshv-test
+FROM scratch AS result-linux-mshv-test
+COPY --from=build-linux-mshv-test --link /sysroot/boot /
+
 FROM --platform=$BUILDPLATFORM package-builder AS result-libunwind
 RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
     /pkg/Tools/build.sh pkg/libunwind
@@ -329,6 +335,7 @@ FROM scratch AS output-x86_64
 COPY --from=output-base       --link / /
 COPY --from=result-linux-snp-guest --link / /linux-snp-guest/
 COPY --from=result-linux-mshv-host --link / /linux-mshv-host/
+COPY --from=result-linux-mshv-test --link / /linux-mshv-test/
 
 FROM scratch AS output-aarch64
 COPY --from=output-base       --link / /
@@ -362,6 +369,8 @@ RUN case "$VERSION" in \
         /input/linux-snp-guest && \
     archive "openvmm-test-linux-mshv-host.x86_64.$VERSION.tar.gz" \
         /input/linux-mshv-host && \
+    archive "openvmm-test-linux-mshv-test.x86_64.$VERSION.tar.gz" \
+        /input/linux-mshv-test && \
     archive "qemu-linux-static.x86_64.$VERSION.tar.gz" /input/qemu && \
     archive "openvmm-test-virtio-villain.x86_64.$VERSION.tar.gz" /input/virtio-villain
 FROM scratch AS packages-x86_64
