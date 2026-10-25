@@ -103,8 +103,9 @@ The **mshv-test** line is the minimal x86_64 mshv root kernel for standalone
 Incubator and Petri tests that run mshv inside another hypervisor. It shares
 the released `rolling-lts/kata/6.18.34.mshv4` source pin with `mshv-host`, but
 starts from the module-free 6.18 test config and enables `CONFIG_MSHV_ROOT`.
-EFI launch, PCIe, virtio block/network, and 9p are built in so the existing
-shared test initrd can boot without a module tree.
+EFI launch, PCIe, virtio block/network/console/vsock, and 9p are built in so
+the existing shared test initrd can boot and connect Pipette without a module
+tree.
 
 This source retains the working EFI-launch path and restores the two-bank
 partition-creation ABI needed by the public build-26100 hypervisor. The sole
