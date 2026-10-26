@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 #
 # Extract virtio-win drivers from the virtio-win ISO.
-# Currently extracts NetKVM only; add more driver families by extending the
-# grep filter below.
+# Extracts NetKVM (virtio-net) and viostor (virtio-blk); add more driver
+# families by extending the grep filter below.
 #
 # This is architecture-independent (the ISO contains Windows PE binaries
 # for multiple guest architectures) and does not use the cross-compilation
@@ -19,10 +19,17 @@ ADD --checksum=sha256:e14cf2b94492c3e925f0070ba7fdfedeb2048c91eea9c5a5afb30232a3
     /tmp/virtio-win.iso
 
 RUN set -e && \
-    for path in $(isoinfo -i /tmp/virtio-win.iso -f | grep '^/NetKVM/' | grep -v '\.pdb$' | grep -vi 'readme' | grep -E '\.[a-zA-Z]{2,}$'); do \
+    for path in $(isoinfo -i /tmp/virtio-win.iso -f | grep -E '^/(NetKVM|viostor)/' | grep -v '\.pdb$' | grep -vi 'readme' | grep -E '\.[a-zA-Z]{2,}$'); do \
       dir="/out$(dirname "$path")" && \
       mkdir -p "$dir" && \
       isoinfo -i /tmp/virtio-win.iso -x "$path" > "/out$path"; \
+    done && \
+    for driver in NetKVM/2k22/amd64/netkvm viostor/2k22/amd64/viostor; do \
+      for extension in inf sys cat; do \
+        test -s "/out/$driver.$extension" || { \
+          echo "missing or empty driver file: $driver.$extension" >&2; exit 1; \
+        }; \
+      done; \
     done && \
     rm /tmp/virtio-win.iso
 
