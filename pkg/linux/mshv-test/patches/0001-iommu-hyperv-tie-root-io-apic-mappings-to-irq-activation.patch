@@ -1,0 +1,190 @@
+From 4178badb4e34463f8112d25cb11ee43ccbd74f09 Mon Sep 17 00:00:00 2001
+From: John Starks <jostarks@microsoft.com>
+Date: Thu, 1 Oct 2026 19:22:47 -0700
+Subject: [PATCH] iommu/hyperv: Tie root IO-APIC mappings to IRQ activation
+
+The Hyper-V root IO-APIC domain maps interrupts when composing their
+messages, but only releases the mappings when recomposing a message or
+freeing the IRQ allocation. Deactivation can release the parent CPU
+vector without freeing that allocation, leaving a hypervisor mapping
+targeting a vector that Linux can reuse. During root-partition boot,
+IRQ probing can leave stale mappings that cause subsequent PCI MSI
+allocations to fail with HV_STATUS_INVALID_PARAMETER and virtio I/O
+to hang.
+
+Map the interrupt during domain activation and unmap it during
+deactivation, before the parent vector domain releases the vector.
+Update the mapping on affinity changes before scheduling old-vector
+cleanup. Leave composition to encode the cached entry, and share the
+unmap operation with replacement and final freeing. Clear the saved
+entry only after a successful unmap.
+
+Moving mapping out of the void composition callback also lets activation
+report hypercall failures instead of returning an uninitialized message.
+This does not make affinity replacement transactional: an unmap failure
+is logged, and a failed replacement cannot undo the parent vector change.
+
+Tested on an x86_64 Hyper-V root partition under nested virtualization.
+Linux child boots passed, along with 20 serial IRQ activation/deactivation
+cycles and 80 affinity and delivery checks. A temporary one-shot mapping
+failure exercised activation failure and recovery on reopening the port.
+
+GitHub Copilot assisted in response to requests to diagnose the boot hang
+and align interrupt mapping with the IRQ lifecycle. It generated the
+implementation, helped trace mapping and vector lifetimes, developed and
+ran the Incubator tests, and drafted this commit message.
+
+Fixes: fb5ef35165a3 ("iommu/hyperv: setup an IO-APIC IRQ remapping domain for root partition")
+Assisted-by: Copilot:gpt-6-astra
+---
+ drivers/iommu/hyperv/hv-irq-remap.c | 91 ++++++++++++++++++-----------
+ 1 file changed, 58 insertions(+), 33 deletions(-)
+
+diff --git a/drivers/iommu/hyperv/hv-irq-remap.c b/drivers/iommu/hyperv/hv-irq-remap.c
+index a75495ce2e55..3e8858b7b0d3 100644
+--- a/drivers/iommu/hyperv/hv-irq-remap.c
++++ b/drivers/iommu/hyperv/hv-irq-remap.c
+@@ -186,44 +186,54 @@ struct hyperv_root_ir_data {
+ 	struct hv_interrupt_entry entry;
+ };
+ 
+-static void
+-hyperv_root_ir_compose_msi_msg(struct irq_data *irq_data, struct msi_msg *msg)
++static int hyperv_root_ir_unmap(struct hyperv_root_ir_data *data)
++{
++	int ret;
++
++	if (data->entry.source != HV_DEVICE_TYPE_IOAPIC ||
++	    !data->entry.ioapic_rte.as_uint64)
++		return 0;
++
++	ret = hv_unmap_ioapic_interrupt(data->ioapic_id, &data->entry);
++	if (!ret)
++		memset(&data->entry, 0, sizeof(data->entry));
++
++	return ret;
++}
++
++static int hyperv_root_ir_map(struct irq_data *irq_data)
+ {
+ 	struct hyperv_root_ir_data *data = irq_data->chip_data;
++	struct irq_cfg *cfg = irqd_cfg(irq_data);
+ 	struct hv_interrupt_entry entry;
+ 	const struct cpumask *affinity;
+-	struct IO_APIC_route_entry e;
+-	struct irq_cfg *cfg;
+-	int cpu, ioapic_id;
+-	u32 vector;
++	int cpu, ret;
+ 
+-	cfg = irqd_cfg(irq_data);
+ 	affinity = irq_data_get_effective_affinity_mask(irq_data);
+ 	cpu = cpumask_first_and(affinity, cpu_online_mask);
+ 
+-	vector = cfg->vector;
+-	ioapic_id = data->ioapic_id;
+-
+-	if (data->entry.source == HV_DEVICE_TYPE_IOAPIC
+-	    && data->entry.ioapic_rte.as_uint64) {
+-		entry = data->entry;
+-
+-		(void)hv_unmap_ioapic_interrupt(ioapic_id, &entry);
+-
+-		data->entry.ioapic_rte.as_uint64 = 0;
+-		data->entry.source = 0; /* Invalid source */
+-	}
++	ret = hyperv_root_ir_unmap(data);
++	if (ret)
++		return ret;
+ 
++	ret = hv_map_ioapic_interrupt(data->ioapic_id, data->is_level, cpu,
++				     cfg->vector, &entry);
++	if (ret)
++		return ret;
++	data->entry = entry;
+ 
+-	if (hv_map_ioapic_interrupt(ioapic_id, data->is_level, cpu,
+-				    vector, &entry))
+-		return;
++	return 0;
++}
+ 
+-	data->entry = entry;
++static void
++hyperv_root_ir_compose_msi_msg(struct irq_data *irq_data, struct msi_msg *msg)
++{
++	struct hyperv_root_ir_data *data = irq_data->chip_data;
++	struct IO_APIC_route_entry e;
+ 
+ 	/* Turn it into an IO_APIC_route_entry, and generate MSI MSG. */
+-	e.w1 = entry.ioapic_rte.low_uint32;
+-	e.w2 = entry.ioapic_rte.high_uint32;
++	e.w1 = data->entry.ioapic_rte.low_uint32;
++	e.w2 = data->entry.ioapic_rte.high_uint32;
+ 
+ 	memset(msg, 0, sizeof(*msg));
+ 	msg->arch_data.vector = e.vector;
+@@ -244,6 +254,10 @@ static int hyperv_root_ir_set_affinity(struct irq_data *data,
+ 	if (ret < 0 || ret == IRQ_SET_MASK_OK_DONE)
+ 		return ret;
+ 
++	ret = hyperv_root_ir_map(data);
++	if (ret)
++		return ret;
++
+ 	vector_schedule_cleanup(cfg);
+ 
+ 	return 0;
+@@ -299,7 +313,6 @@ static void hyperv_root_irq_remapping_free(struct irq_domain *domain,
+ {
+ 	struct irq_data *irq_data;
+ 	struct hyperv_root_ir_data *data;
+-	struct hv_interrupt_entry *e;
+ 	int i;
+ 
+ 	for (i = 0; i < nr_irqs; i++) {
+@@ -307,13 +320,7 @@ static void hyperv_root_irq_remapping_free(struct irq_domain *domain,
+ 
+ 		if (irq_data && irq_data->chip_data) {
+ 			data = irq_data->chip_data;
+-			e = &data->entry;
+-
+-			if (e->source == HV_DEVICE_TYPE_IOAPIC &&
+-			    e->ioapic_rte.as_uint64)
+-				(void)hv_unmap_ioapic_interrupt(data->ioapic_id,
+-								&data->entry);
+-
++			hyperv_root_ir_unmap(data);
+ 			kfree(data);
+ 		}
+ 	}
+@@ -321,8 +328,26 @@ static void hyperv_root_irq_remapping_free(struct irq_domain *domain,
+ 	irq_domain_free_irqs_common(domain, virq, nr_irqs);
+ }
+ 
++static int hyperv_root_irq_remapping_activate(struct irq_domain *domain,
++					     struct irq_data *irq_data,
++					     bool reserve)
++{
++	return hyperv_root_ir_map(irq_data);
++}
++
++static void hyperv_root_irq_remapping_deactivate(struct irq_domain *domain,
++					       struct irq_data *irq_data)
++{
++	struct hyperv_root_ir_data *data = irq_data->chip_data;
++
++	/* Release the hypervisor mapping before the parent recycles the vector. */
++	hyperv_root_ir_unmap(data);
++}
++
+ static const struct irq_domain_ops hyperv_root_ir_domain_ops = {
+ 	.select = hyperv_irq_remapping_select,
+ 	.alloc = hyperv_root_irq_remapping_alloc,
+ 	.free = hyperv_root_irq_remapping_free,
++	.activate = hyperv_root_irq_remapping_activate,
++	.deactivate = hyperv_root_irq_remapping_deactivate,
+ };
+-- 
+2.43.0
+

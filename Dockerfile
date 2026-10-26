@@ -88,13 +88,12 @@ ADD --link https://github.com/gregkh/linux.git#83657f4189612e5cbcabc3058acd36c0b
 # linux v7.2-rc1 with the KVM CCA v15 patchset
 FROM scratch AS src-linux-cca-v15
 ADD --link https://gitlab.arm.com/linux-arm/linux-cca.git#4ddbc65b5b408c37605110166a8da19f4dd0e180 /
-# linux v6.18.53 (linux-6.18.y) -- SEV-SNP guest for MSHV tests
+# Azure Linux SEV-SNP guest (rolling-lts/kata-uvm/6.18.52.mshv2)
 FROM scratch AS src-linux-snp-guest
-ADD --link https://github.com/gregkh/linux.git#e8694cdbd7db99fa26f6e8c80a2a337e0de29a2f /
-# Azure Linux MSHV kernel (rolling-lts/mshv/6.18.34.mshv3) with the SNP
-# interrupt injection policy UAPI (user/cho/mshv-snp-normal-injection)
+ADD --link https://github.com/microsoft/CBL-Mariner-Linux-Kernel.git#63eba05d57bf300fa611da6d7511fa9723a237ae /
+# Azure Linux MSHV host (rolling-lts/kata/6.18.34.mshv4)
 FROM scratch AS src-linux-mshv-host
-ADD --link https://github.com/microsoft/CBL-Mariner-Linux-Kernel.git#f10394f7b07d5a1ee469fc3b85249d3bcdeee193 /
+ADD --link https://github.com/microsoft/CBL-Mariner-Linux-Kernel.git#e72bb1d3ea93dea7891303c58c71e1a6d5ef6da0 /
 # llvm-project (release/17.x) -- used by libunwind and sdk
 FROM scratch AS src-llvm
 ADD --link https://github.com/llvm/llvm-project.git#6009708b4367171ccdbf4b5905cb6a803753fe18 /
@@ -220,7 +219,7 @@ FROM scratch AS result-linux-cca-v15
 COPY --from=build-linux-cca-v15 --link /sysroot/boot /
 
 FROM --platform=$BUILDPLATFORM package-builder AS build-linux-snp-guest
-RUN --mount=type=bind,from=src-linux-snp-guest,source=/,target=/pkg/linux/src,rw \
+RUN --mount=type=bind,from=src-linux-snp-guest,source=/,target=/pkg/linux/src \
     /pkg/Tools/build.sh sysroots/linux-snp-guest
 FROM scratch AS result-linux-snp-guest
 COPY --from=build-linux-snp-guest --link /sysroot/boot /
@@ -230,6 +229,12 @@ RUN --mount=type=bind,from=src-linux-mshv-host,source=/,target=/pkg/linux/src \
     /pkg/Tools/build.sh sysroots/linux-mshv-host
 FROM scratch AS result-linux-mshv-host
 COPY --from=build-linux-mshv-host --link /sysroot/boot /
+
+FROM --platform=$BUILDPLATFORM package-builder AS build-linux-mshv-test
+RUN --mount=type=bind,from=src-linux-mshv-host,source=/,target=/pkg/linux/src,rw \
+    /pkg/Tools/build.sh sysroots/linux-mshv-test
+FROM scratch AS result-linux-mshv-test
+COPY --from=build-linux-mshv-test --link /sysroot/boot /
 
 FROM --platform=$BUILDPLATFORM package-builder AS result-libunwind
 RUN --mount=type=bind,from=src-llvm,source=/,target=/pkg/libunwind/src \
@@ -330,6 +335,7 @@ FROM scratch AS output-x86_64
 COPY --from=output-base       --link / /
 COPY --from=result-linux-snp-guest --link / /linux-snp-guest/
 COPY --from=result-linux-mshv-host --link / /linux-mshv-host/
+COPY --from=result-linux-mshv-test --link / /linux-mshv-test/
 
 FROM scratch AS output-aarch64
 COPY --from=output-base       --link / /
@@ -363,6 +369,8 @@ RUN case "$VERSION" in \
         /input/linux-snp-guest && \
     archive "openvmm-test-linux-mshv-host.x86_64.$VERSION.tar.gz" \
         /input/linux-mshv-host && \
+    archive "openvmm-test-linux-mshv-test.x86_64.$VERSION.tar.gz" \
+        /input/linux-mshv-test && \
     archive "qemu-linux-static.x86_64.$VERSION.tar.gz" /input/qemu && \
     archive "openvmm-test-virtio-villain.x86_64.$VERSION.tar.gz" /input/virtio-villain
 FROM scratch AS packages-x86_64

@@ -138,8 +138,8 @@
       "component": {
         "type": "git",
         "git": {
-          "repositoryUrl": "https://github.com/gregkh/linux",
-          "commitHash": "e8694cdbd7db99fa26f6e8c80a2a337e0de29a2f"
+          "repositoryUrl": "https://github.com/microsoft/CBL-Mariner-Linux-Kernel",
+          "commitHash": "63eba05d57bf300fa611da6d7511fa9723a237ae"
         }
       }
     },
@@ -148,7 +148,7 @@
         "type": "git",
         "git": {
           "repositoryUrl": "https://github.com/microsoft/CBL-Mariner-Linux-Kernel",
-          "commitHash": "f10394f7b07d5a1ee469fc3b85249d3bcdeee193"
+          "commitHash": "e72bb1d3ea93dea7891303c58c71e1a6d5ef6da0"
         }
       }
     },

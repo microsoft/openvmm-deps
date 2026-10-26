@@ -1,15 +1,15 @@
 # Linux Kernel Configuration
 
 This directory contains the kernel configs and build script for the OpenVMM
-test kernels. These kernels are used by the petri test framework with Linux
-direct boot (`Firmware::LinuxDirect`).
+test kernels. Petri and Incubator use them as guest kernels or nested test
+hosts.
 
 The build is structured to support multiple kernel lines side-by-side.
-Today **6.1** (LTS), **6.18**, **cca-v15**, **snp-guest**, and **mshv-host**
-ship; additional lines can be added purely additively (see "Adding a new
-kernel version" below). The CCA line is Arm-only and ships for `aarch64`
-only. The MSHV host and SNP guest lines ship for `x86_64` only. Each kernel
-is published as its own GitHub release artifact
+Today **6.1** (LTS), **6.18**, **cca-v15**, **snp-guest**, **mshv-host**, and
+**mshv-test** ship; additional lines can be added purely additively (see
+"Adding a new kernel version" below). The CCA line is Arm-only and ships for
+`aarch64` only. The MSHV host, MSHV test, and SNP guest lines ship for `x86_64`
+only. Each kernel is published as its own GitHub release artifact
 (`openvmm-test-linux-<version>.<arch>.<release>.tar.gz`) containing the
 kernel images and final config. The initrd is shared across all kernels
 and ships as its own `openvmm-test-initrd.<arch>.<release>.tar.gz`
@@ -34,10 +34,13 @@ pkg/linux/
   snp-guest/
     x86_64.config         # SEV-SNP guest kernel / x86_64
     required.config       # Settings the SNP guest boot needs
-    patches/              # SNP guest patches applied to the source
   mshv-host/
     x86_64.config         # MSHV root-partition host kernel / x86_64
     required.config       # Settings the Azure MSHV host needs
+  mshv-test/
+    x86_64.config         # Module-free mshv test root partition / x86_64
+    required.config       # Built-in boot, network, and share drivers
+    patches/              # Root IO-APIC interrupt lifecycle fix
 ```
 
 The version selection is driven by `$LINUX_VERSION`, which is exported by
@@ -45,7 +48,9 @@ the corresponding `sysroots/linux-<version>/deps` file (a single line of
 the form `LINUX_VERSION=<version>`, picked up by `pkg/Tools/build.sh`'s env
 handling). The Dockerfile pins one source-tree commit per kernel line
 (`src-linux-6.1`, etc.) and bind-mounts the matching source into the
-corresponding `build-linux-<version>` stage.
+corresponding `build-linux-<version>` stage. Kernel flavors may share a source
+stage while selecting different configs and patches; `mshv-test` reuses
+`src-linux-mshv-host`.
 
 A kernel line can also set these options in its deps file:
 
@@ -68,27 +73,21 @@ configuration. The same image supports QEMU and FVP L1 hosts, nested Realm
 guests, and the generic AArch64 TCG VFIO/P2P tests.
 
 The **snp-guest** line is the L2 guest kernel for OpenVMM tests on MSHV with
-SEV-SNP. It builds the stable `v6.18.53` tag. Its config seed is
-`Microsoft/configs/x86/uvm_defconfig` from the Azure Linux kata-uvm tag
-`rolling-lts/kata-uvm/6.18.52.mshv1` (commit `ce4c4c2d`) in
+SEV-SNP. It builds the Azure Linux tag
+`rolling-lts/kata-uvm/6.18.52.mshv2` (commit `63eba05d`) in
 [CBL-Mariner-Linux-Kernel](https://github.com/microsoft/CBL-Mariner-Linux-Kernel),
-resolved by this build. The patches come from the
-[`snp-6.18-guest-unregister`](https://github.com/chris-oo/CBL-Mariner-Linux-Kernel/tree/snp-6.18-guest-unregister)
-branch, rebased onto `v6.18.53`:
-
-| Patch | Upstream commit | Purpose |
-|---|---|---|
-| `0001` | `8e6fbce7` | Unregister the decompressor GHCB before making its page private. |
-| `0002` | `a8b36965` | Enable x2APIC early, before the boot CPU APIC ID is read. |
-| `0003` | `6e82e92b` | Allocate hypercall output pages for SNP AP startup. |
+with a config based on `Microsoft/configs/x86/uvm_defconfig`, resolved by this
+build. The tag includes the GHCB unregister, early x2APIC, and SNP AP
+output-page fixes, so this line needs no local patches.
 
 Boot-critical settings in `required.config` must stay built in, because the
 artifact does not ship modules.
 
 The **mshv-host** line is the L1 kernel for Azure Linux Dom0 test runners,
-built from commit
-[`f10394f7`](https://github.com/microsoft/CBL-Mariner-Linux-Kernel/commit/f10394f7b07d5a1ee469fc3b85249d3bcdeee193)
-with its `Microsoft/configs/x86/mshv_defconfig`.
+built from the Azure Linux tag `rolling-lts/kata/6.18.34.mshv4` (commit
+[`e72bb1d3`](https://github.com/microsoft/CBL-Mariner-Linux-Kernel/commit/e72bb1d3ea93dea7891303c58c71e1a6d5ef6da0))
+with its `Microsoft/configs/x86/mshv_defconfig`. The tag includes the SNP
+interrupt injection policy and unmap-before-reclaim fixes.
 
 The line sets `LINUX_MODULES=1`, so the artifact includes signed modules
 under `lib/modules/<release>/`. Install the kernel and modules on the runner,
@@ -99,6 +98,35 @@ not byte-for-byte reproducible.
 The package builder has no `pahole`, so the resolved config drops BTF
 (`DEBUG_INFO_BTF`) and the options that depend on it. The MSHV tests do not
 need BTF.
+
+The **mshv-test** line is the minimal x86_64 mshv root kernel for standalone
+Incubator and Petri tests that run mshv inside another hypervisor. It shares
+the released `rolling-lts/kata/6.18.34.mshv4` source pin with `mshv-host`, but
+starts from the module-free 6.18 test config and enables `CONFIG_MSHV_ROOT`.
+EFI launch, PCIe, virtio block/network/console/vsock, and 9p are built in so
+the existing shared test initrd can boot and connect Pipette without a module
+tree.
+
+This source retains the working EFI-launch path and restores the two-bank
+partition-creation ABI needed by the public build-26100 hypervisor. The sole
+local patch ties root IO-APIC mappings to IRQ activation/deactivation, releasing
+them before Linux recycles interrupt vectors. Without it, stale mappings from
+IRQ probing can prevent virtio devices from working during nested root boot.
+The test line does not include the separate MSI lifecycle fix or other
+development-branch changes. The installed Azure Dom0 `mshv-host` configuration
+and module packaging are unchanged.
+
+Build this kernel alone with:
+
+```bash
+docker build --platform linux/amd64 --target result-linux-mshv-test \
+  --output type=local,dest=out/linux-mshv-test .
+```
+
+The x86_64 package target publishes it as
+`openvmm-test-linux-mshv-test.x86_64.<release>.tar.gz`. The archive contains
+`vmlinux`, `bzImage`, the resolved `config`, and `manifest.txt`; the initrd
+remains a separate shared artifact.
 
 ## Updating a kernel config
 
