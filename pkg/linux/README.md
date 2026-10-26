@@ -118,11 +118,13 @@ this kernel does not enable registered ARM64 nested Petri tests or supply
 the separate ARM64 EFI loader and hypervisor binaries.
 
 This source retains the working EFI-launch path and restores the two-bank
-partition-creation ABI needed by the public build-26100 hypervisor. The sole
-local patch affects x86_64 only: it ties root IO-APIC mappings to IRQ
+partition-creation ABI needed by the public build-26100 hypervisor. The
+IO-APIC patch affects x86_64 only: it ties root IO-APIC mappings to IRQ
 activation/deactivation, releasing them before Linux recycles interrupt
 vectors. Without it, stale mappings from
 IRQ probing can prevent virtio devices from working during nested root boot.
+An additional patch guards SEV-SNP-only helpers with their callers' feature
+and architecture conditions so ARM64 builds retain `CONFIG_WERROR=y`.
 The test line does not include the separate MSI lifecycle fix or other
 development-branch changes. The installed Azure Dom0 `mshv-host` configuration
 and module packaging are unchanged.

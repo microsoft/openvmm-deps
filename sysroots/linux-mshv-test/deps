@@ -1,5 +1,5 @@
 # The module-free mshv root kernel for Incubator and nested Petri tests.
-# Share the released source with mshv-host; the IO-APIC fix affects x86_64 only.
+# Share the released source with mshv-host; apply the test-root compatibility fixes.
 LINUX_VERSION=mshv-test
 LINUX_SOURCE_REVISION=e72bb1d3ea93dea7891303c58c71e1a6d5ef6da0
 LINUX_SOURCE_EPOCH=1791913521
