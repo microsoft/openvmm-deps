@@ -52,8 +52,9 @@ fi
 
 make -j`nproc` -k -f $SRCDIR/Makefile ARCH="$KARCH" CROSS_COMPILE="$ARCH-linux-musl-" olddefconfig $KTARGETS
 
-required_config="$PKGDIR/$LINUX_VERSION/required.config"
-if [ -f "$required_config" ]; then
+for required_config in "$PKGDIR/$LINUX_VERSION/required.config" \
+    "$PKGDIR/$LINUX_VERSION/required.$ARCH.config"; do
+    [ -f "$required_config" ] || continue
     while IFS= read -r setting; do
         case "$setting" in
             "") continue ;;
@@ -65,7 +66,7 @@ if [ -f "$required_config" ]; then
             exit 1
         fi
     done <"$required_config"
-fi
+done
 
 kernel_release="$(make -s -f "$SRCDIR/Makefile" ARCH="$KARCH" \
     CROSS_COMPILE="$ARCH-linux-musl-" kernelrelease)"

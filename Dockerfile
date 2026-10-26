@@ -339,6 +339,7 @@ COPY --from=result-linux-mshv-test --link / /linux-mshv-test/
 
 FROM scratch AS output-aarch64
 COPY --from=output-base       --link / /
+COPY --from=result-linux-mshv-test --link / /linux-mshv-test/
 COPY --from=result-linux-cca-v15 --link / /linux-cca-v15/
 COPY --from=result-rmm-cca --link / /rmm-cca/
 COPY --from=result-tfa-cca --link / /tfa-cca/
@@ -395,6 +396,8 @@ RUN case "$VERSION" in \
     archive "openvmm-test-initrd.aarch64.$VERSION.tar.gz" /input/initrd && \
     archive "openvmm-test-linux-6.1.aarch64.$VERSION.tar.gz" /input/linux-6.1 && \
     archive "openvmm-test-linux-6.18.aarch64.$VERSION.tar.gz" /input/linux-6.18 && \
+    archive "openvmm-test-linux-mshv-test.aarch64.$VERSION.tar.gz" \
+        /input/linux-mshv-test && \
     archive "openvmm-test-linux-cca-v15.aarch64.$VERSION.tar.gz" \
         /input/linux-cca-v15 && \
     archive "openvmm-test-rmm-cca.aarch64.$VERSION.tar.gz" /input/rmm-cca && \
