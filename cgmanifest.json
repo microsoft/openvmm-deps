@@ -288,6 +288,15 @@
       "component": {
         "type": "git",
         "git": {
+          "repositoryUrl": "https://github.com/microsoft/HvLoader",
+          "commitHash": "fbf04f7cf2cb40c0c5e71ce61c438ff20ec4610d"
+        }
+      }
+    },
+    {
+      "component": {
+        "type": "git",
+        "git": {
           "repositoryUrl": "https://github.com/cpputest/cpputest",
           "commitHash": "67d2dfd41e13f09ff218aa08e2d35f1c32f032a1"
         }

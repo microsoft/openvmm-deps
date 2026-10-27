@@ -31,7 +31,9 @@ Two patches preserve the validated Incubator configuration:
   for development/testing only.** Remove it when the loader is fixed.
 
 The artifact does not contain HvLoader, `lxhvloader.dll`, Hyper-V, or other
-Windows payloads. Supply those boot inputs separately.
+Windows payloads. Fetch the public `HvLoader.efi` application from the
+separate [HvLoader artifact](../hvloader/README.md), and supply the DLL and
+hypervisor runtime separately.
 
 The release archive is:
 
