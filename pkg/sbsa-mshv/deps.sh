@@ -13,6 +13,7 @@ apt-get install -y --no-install-recommends \
     device-tree-compiler \
     gcc-aarch64-linux-gnu \
     git \
+    libssl-dev \
     nasm \
     patch \
     python3 \
