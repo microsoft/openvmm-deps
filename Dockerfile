@@ -128,6 +128,13 @@ ADD --keep-git-dir=true --link https://github.com/TF-RMM/tf-rmm.git#f00eac344b6f
 # TF-A v2.15.0, used to load TF-RMM and Linux-direct BL33.
 FROM scratch AS src-tfa-cca
 ADD --keep-git-dir=true --link https://github.com/TrustedFirmware-A/trusted-firmware-a.git#da738d5eae93af342fdc4995dd3c05acb4c9d757 /
+# SBSA MSHV firmware: TF-A v2.14.0 and compatible EDK2/platforms revisions.
+FROM scratch AS src-tfa-sbsa-mshv
+ADD --keep-git-dir=true --link https://github.com/TrustedFirmware-A/trusted-firmware-a.git#1d5aa939bc8d3d892e2ed9945fa50e36a1a924cc /
+FROM scratch AS src-edk2-sbsa-mshv
+ADD --link https://github.com/tianocore/edk2.git#80fd66aef9ba7275380935622d5558cb2c6488e5 /
+FROM scratch AS src-edk2-platforms-sbsa-mshv
+ADD --link https://github.com/tianocore/edk2-platforms.git#349207b2dce9467c2c8dc90efd70c55c1fc4d3d1 /
 # TF-RMM submodules -- pinned by the TF-RMM superproject.
 FROM scratch AS src-tf-rmm-cpputest
 ADD --keep-git-dir=true --link https://github.com/cpputest/cpputest.git#67d2dfd41e13f09ff218aa08e2d35f1c32f032a1 /
@@ -309,6 +316,25 @@ RUN --mount=type=bind,from=src-tfa-cca,source=/,target=/pkg/tfa/src \
 FROM scratch AS result-tfa-cca
 COPY --from=build-tfa-cca --link /out/ /
 
+# Build the paired TF-A/UEFI flash images for the ARM64 MSHV Incubator.
+FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS build-sbsa-mshv
+ARG TARGETARCH
+ENV TARGETARCH=$TARGETARCH
+COPY --link pkg/sbsa-mshv/deps.sh /pkg/sbsa-mshv/deps.sh
+RUN bash /pkg/sbsa-mshv/deps.sh
+COPY --link pkg/sbsa-mshv /pkg/sbsa-mshv
+RUN --network=none \
+    --mount=type=bind,from=src-tfa-sbsa-mshv,source=/,target=/pkg/sbsa-mshv/src/tfa \
+    --mount=type=bind,from=src-edk2-sbsa-mshv,source=/,target=/pkg/sbsa-mshv/src/edk2 \
+    --mount=type=bind,from=src-edk2-platforms-sbsa-mshv,source=/,target=/pkg/sbsa-mshv/src/edk2-platforms \
+    TFA_SOURCE_REVISION=1d5aa939bc8d3d892e2ed9945fa50e36a1a924cc \
+    EDK2_SOURCE_REVISION=80fd66aef9ba7275380935622d5558cb2c6488e5 \
+    EDK2_PLATFORMS_SOURCE_REVISION=349207b2dce9467c2c8dc90efd70c55c1fc4d3d1 \
+    SOURCE_DATE_EPOCH=1779498640 \
+    bash /pkg/sbsa-mshv/build.sh
+FROM scratch AS result-sbsa-mshv
+COPY --from=build-sbsa-mshv --link /out/ /
+
 # Build the architecture-neutral output set. The release workflow packs each
 # top-level subdirectory into its own GitHub release artifact:
 #   openvmm-deps/  -> openvmm-deps.<arch>.<release>.tar.gz
@@ -343,6 +369,7 @@ COPY --from=result-linux-mshv-test --link / /linux-mshv-test/
 COPY --from=result-linux-cca-v15 --link / /linux-cca-v15/
 COPY --from=result-rmm-cca --link / /rmm-cca/
 COPY --from=result-tfa-cca --link / /tfa-cca/
+COPY --from=result-sbsa-mshv --link / /sbsa-mshv/
 
 # Package the output directories into the exact archives uploaded by the
 # release workflow. Keep packaging inside the Docker graph so PR and release
@@ -402,6 +429,7 @@ RUN case "$VERSION" in \
         /input/linux-cca-v15 && \
     archive "openvmm-test-rmm-cca.aarch64.$VERSION.tar.gz" /input/rmm-cca && \
     archive "openvmm-test-tfa-cca.aarch64.$VERSION.tar.gz" /input/tfa-cca && \
+    archive "openvmm-test-sbsa-mshv.aarch64.$VERSION.tar.gz" /input/sbsa-mshv && \
     archive "qemu-linux-static.aarch64.$VERSION.tar.gz" /input/qemu && \
     archive "openvmm-test-virtio-villain.aarch64.$VERSION.tar.gz" /input/virtio-villain
 FROM scratch AS packages-aarch64

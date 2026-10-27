@@ -1,0 +1,39 @@
+From: OpenVMM contributors
+Subject: [PATCH] SbsaQemu: include virtio PCI and block drivers
+
+Allow the Incubator's virtio boot disk to boot through UEFI.
+
+diff --git a/Platform/Qemu/SbsaQemu/SbsaQemu.dsc b/Platform/Qemu/SbsaQemu/SbsaQemu.dsc
+--- a/Platform/Qemu/SbsaQemu/SbsaQemu.dsc
++++ b/Platform/Qemu/SbsaQemu/SbsaQemu.dsc
+@@ -163,6 +163,7 @@ DEFINE NETWORK_HTTP_BOOT_ENABLE       = FALSE
+   VariablePolicyHelperLib|MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
+
+   UefiBootManagerLib|MdeModulePkg/Library/UefiBootManagerLib/UefiBootManagerLib.inf
++  VirtioLib|OvmfPkg/Library/VirtioLib/VirtioLib.inf
+
+   ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
+
+@@ -723,6 +724,9 @@ DEFINE NETWORK_HTTP_BOOT_ENABLE       = FALSE
+   ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
+   MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+   MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
++  OvmfPkg/VirtioPciDeviceDxe/VirtioPciDeviceDxe.inf
++  OvmfPkg/Virtio10Dxe/Virtio10.inf
++  OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
+
+   #
+   # NVME support
+diff --git a/Platform/Qemu/SbsaQemu/SbsaQemu.fdf b/Platform/Qemu/SbsaQemu/SbsaQemu.fdf
+--- a/Platform/Qemu/SbsaQemu/SbsaQemu.fdf
++++ b/Platform/Qemu/SbsaQemu/SbsaQemu.fdf
+@@ -252,6 +252,9 @@ READ_LOCK_STATUS   = TRUE
+   INF ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
+   INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+   INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
++  INF OvmfPkg/VirtioPciDeviceDxe/VirtioPciDeviceDxe.inf
++  INF OvmfPkg/Virtio10Dxe/Virtio10.inf
++  INF OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
+
+   #
+   # NVME support

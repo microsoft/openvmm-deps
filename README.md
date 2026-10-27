@@ -32,6 +32,7 @@ out/
   linux-mshv-test/     vmlinux, bzImage/Image, config, manifest
   rmm-cca/             rmm.img and debug artifacts (aarch64 output only)
   tfa-cca/             flash.bin and debug artifacts (aarch64 output only)
+  sbsa-mshv/           paired TF-A/UEFI flash images and manifest (aarch64 output only)
   qemu/                qemu-system-aarch64, qemu-system-x86_64
   virtio-villain/      initramfs.cpio.gz, tests.tsv
 ```
@@ -50,6 +51,7 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-test-linux-mshv-test.<arch>.<ver>.tar.gz`    | Module-free mshv root kernel for Incubator and nested Petri tests |
 | `openvmm-test-rmm-cca.aarch64.<ver>.tar.gz`             | TF-RMM firmware for QEMU virt CCA tests |
 | `openvmm-test-tfa-cca.aarch64.<ver>.tar.gz`             | TF-A firmware for Linux-direct QEMU virt CCA tests |
+| `openvmm-test-sbsa-mshv.aarch64.<ver>.tar.gz`          | Paired TF-A/UEFI flash for QEMU sbsa-ref MSHV Incubator |
 | `openvmm-test-virtio-win.<ver>.tar.gz`                | virtio-win NetKVM and viostor drivers (all OS/arch) |
 | `openvmm-test-virtio-villain.<arch>.<ver>.tar.gz`     | virtio-villain guest initramfs + `tests.tsv` |
 | `qemu-linux-static.<arch>.<ver>.tar.gz`                | static QEMU system emulators (TCG)    |
@@ -78,6 +80,13 @@ the kernel and `openvmm-test-initrd` for the userland (the same initrd
 is used with every kernel version). Additional kernel lines may be
 added as separate `openvmm-test-linux-<version>` artifacts in future
 releases.
+
+The ARM64 MSHV Incubator firmware is built from pinned TF-A, EDK2, and
+edk2-platforms sources, including the temporary HvLoader memory-attribute
+workaround. It is development/test firmware, not a production image.
+See [pkg/sbsa-mshv/README.md](pkg/sbsa-mshv/README.md) for source pins,
+patches, flash layout, and build targets. Hyper-V and its loader payloads
+are separate inputs and are not included in this artifact.
 
 For local testing, you can:
 - Copy `out/openvmm-deps/sysroot.tar.gz` to `<openvmm src>/.packages/openvmm-deps/`
