@@ -125,9 +125,6 @@ vectors. Without it, stale mappings from
 IRQ probing can prevent virtio devices from working during nested root boot.
 An additional patch guards SEV-SNP-only helpers with their callers' feature
 and architecture conditions so ARM64 builds retain `CONFIG_WERROR=y`.
-A third patch keeps the required ARM64 GICv3/v4 processor feature enabled
-when userspace creates a partition without explicit feature banks; disabling
-it makes Hyper-V reject partition creation with `EINVAL`.
 The test line does not include the separate MSI lifecycle fix or other
 development-branch changes. The installed Azure Dom0 `mshv-host` configuration
 and module packaging are unchanged.
