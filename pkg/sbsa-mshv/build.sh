@@ -29,11 +29,8 @@ inputs="$BUILDDIR/firmware-inputs/Platform/Qemu/Sbsa"
 # Normalize the patched files so the checked-in patches can use LF endings.
 sed -i 's/\r$//' \
     "$edk2/ArmPkg/Library/PlatformBootManagerLib/PlatformBm.c" \
-    "$edk2/ArmPkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf" \
-    "$platforms/Platform/Qemu/SbsaQemu/SbsaQemu.dsc" \
-    "$platforms/Platform/Qemu/SbsaQemu/SbsaQemu.fdf"
+    "$edk2/ArmPkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf"
 patch -d "$edk2" -p1 < "$PKGDIR/patches/0001-edk2-hvloader-memory-attributes-workaround.patch"
-patch -d "$platforms" -p1 < "$PKGDIR/patches/0002-sbsa-enable-virtio-boot.patch"
 
 export SOURCE_DATE_EPOCH
 export CROSS_COMPILE=aarch64-linux-gnu-
@@ -84,11 +81,9 @@ uefi_toolchain=GCC
 rme_enabled=false
 rmm_enabled=false
 uninstall_memory_attribute_protocol=true
-virtio_boot=true
 flash_size=268435456
 flash0_sha256=$(sha256sum "$OUTPUTDIR/SBSA_FLASH0.fd" | awk '{print $1}')
 flash1_sha256=$(sha256sum "$OUTPUTDIR/SBSA_FLASH1.fd" | awk '{print $1}')
 edk2_patch_sha256=$(sha256sum "$PKGDIR/patches/0001-edk2-hvloader-memory-attributes-workaround.patch" | awk '{print $1}')
-edk2_platforms_patch_sha256=$(sha256sum "$PKGDIR/patches/0002-sbsa-enable-virtio-boot.patch" | awk '{print $1}')
 toolchain=$(${CROSS_COMPILE}gcc --version | sed -n '1p')
 EOF

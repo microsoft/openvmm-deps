@@ -21,14 +21,14 @@ FIP are staged as the firmware inputs expected by the SBSA EDK2 platform;
 no prebuilt `edk2-non-osi` binaries are used. UEFI uses the `RELEASE` build
 target and `GCC` toolchain.
 
-Two patches preserve the validated Incubator configuration:
+The Incubator boot disk uses SBSA's built-in AHCI/SATA controller and the
+standard ATA/AHCI firmware drivers. No extra virtio boot drivers are added.
 
-- Include the standard virtio PCI transport and block drivers so UEFI can
-  read the Incubator boot disk.
-- Honor `PcdUninstallMemAttrProtocol` in the Arm boot manager, and build with
-  it enabled. This temporarily works around HvLoader binding imports after
-  making its IAT read-only. **This weakens firmware image protection and is
-  for development/testing only.** Remove it when the loader is fixed.
+One patch honors `PcdUninstallMemAttrProtocol` in the Arm boot manager, and
+the build enables it. This temporarily works around HvLoader binding
+imports after making its IAT read-only. **This weakens firmware image
+protection and is for development/testing only.** Remove it when the
+loader is fixed.
 
 The artifact does not contain HvLoader, `lxhvloader.dll`, Hyper-V, or other
 Windows payloads. Fetch the public `HvLoader.efi` application from the
