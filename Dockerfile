@@ -119,9 +119,9 @@ ADD --link https://github.com/TrustedComputingGroup/TPM.git#bc29a21d44b01396223c
 # mimalloc v2.2.4 (matches the bundled version in libmimalloc-sys 0.1.44 / mimalloc 0.1.48)
 FROM scratch AS src-mimalloc
 ADD --unpack --checksum=sha256:754a98de5e2912fddbeaf24830f982b4540992f1bab4a0a8796ee118e0752bda --link https://github.com/microsoft/mimalloc/archive/refs/tags/v2.2.4.tar.gz /
-# qemu (v11.0.1)
+# qemu (v11.1.3)
 FROM scratch AS src-qemu
-ADD --unpack --checksum=sha256:b3c66db81b337ef296b838066d41ec479ea2172e795ee113cb30c1f982b9ca39 --link https://github.com/qemu/qemu/archive/refs/tags/v11.0.1.tar.gz /
+ADD --unpack --checksum=sha256:643d43a2babf627f130903c93c5c3303916af8af80f8a296a062e5325bb8fc02 --link https://github.com/qemu/qemu/archive/refs/tags/v11.1.3.tar.gz /
 # TF-RMM v2 integration branch, tested with the KVM CCA v15 patchset.
 FROM scratch AS src-tf-rmm-cca
 ADD --keep-git-dir=true --link https://github.com/TF-RMM/tf-rmm.git#f00eac344b6f7c18abc6dad1948b07e9a82ff9f0 /
@@ -269,7 +269,7 @@ ENV TARGETARCH=$TARGETARCH
 COPY --link pkg/qemu/deps.sh /pkg/qemu/deps.sh
 RUN /pkg/qemu/deps.sh
 COPY --link pkg/qemu /pkg/qemu
-RUN --mount=type=bind,from=src-qemu,source=/qemu-11.0.1,target=/pkg/qemu/src,rw \
+RUN --mount=type=bind,from=src-qemu,source=/qemu-11.1.3,target=/pkg/qemu/src,rw \
     cd /pkg/qemu/src && /pkg/qemu/patch.sh && /pkg/qemu/build.sh
 FROM scratch AS result-qemu
 COPY --from=build-qemu --link /out/ /
