@@ -1,0 +1,86 @@
+From: OpenVMM contributors
+Subject: [PATCH] ArmPkg: allow disabling memory attributes for HvLoader bring-up
+
+HvLoader currently protects its image sections before binding imports, then
+faults writing its read-only IAT. Reuse the existing OVMF development PCD to
+uninstall the memory attribute protocol in the Arm boot manager as well.
+This is a temporary development workaround, not a production firmware setting.
+
+diff --git a/ArmPkg/Library/PlatformBootManagerLib/PlatformBm.c b/ArmPkg/Library/PlatformBootManagerLib/PlatformBm.c
+--- a/ArmPkg/Library/PlatformBootManagerLib/PlatformBm.c
++++ b/ArmPkg/Library/PlatformBootManagerLib/PlatformBm.c
+@@ -25,6 +25,7 @@
+ #include <Protocol/EsrtManagement.h>
+ #include <Protocol/GraphicsOutput.h>
+ #include <Protocol/LoadedImage.h>
++#include <Protocol/MemoryAttribute.h>
+ #include <Protocol/NonDiscoverableDevice.h>
+ #include <Protocol/PciIo.h>
+ #include <Protocol/PciRootBridgeIo.h>
+@@ -1002,6 +1003,39 @@ PlatformBootManagerAfterConsole (
+   UINTN                         PosX;
+   UINTN                         PosY;
+   EFI_INPUT_KEY                 Key;
++  EFI_HANDLE                    MemoryAttributeHandle;
++  EFI_MEMORY_ATTRIBUTE_PROTOCOL *MemoryAttribute;
++  UINTN                         HandleSize;
++
++  // Temporary workaround for HvLoader import binding after image protection.
++  if (FixedPcdGetBool (PcdUninstallMemAttrProtocol)) {
++    HandleSize = sizeof (MemoryAttributeHandle);
++    Status = gBS->LocateHandle (
++                    ByProtocol,
++                    &gEfiMemoryAttributeProtocolGuid,
++                    NULL,
++                    &HandleSize,
++                    &MemoryAttributeHandle
++                    );
++    if (!EFI_ERROR (Status)) {
++      Status = gBS->HandleProtocol (
++                      MemoryAttributeHandle,
++                      &gEfiMemoryAttributeProtocolGuid,
++                      (VOID **)&MemoryAttribute
++                      );
++      ASSERT_EFI_ERROR (Status);
++      if (!EFI_ERROR (Status)) {
++        Status = gBS->UninstallProtocolInterface (
++                        MemoryAttributeHandle,
++                        &gEfiMemoryAttributeProtocolGuid,
++                        MemoryAttribute
++                        );
++        ASSERT_EFI_ERROR (Status);
++      }
++    }
++
++    Print (L"Incubator: uninstall memory attribute protocol: %r\n", Status);
++  }
+
+   FirmwareVerLength = StrLen (PcdGetPtr (PcdFirmwareVersionString));
+
+diff --git a/ArmPkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf b/ArmPkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
+--- a/ArmPkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
++++ b/ArmPkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
+@@ -33,6 +33,7 @@
+   EmbeddedPkg/EmbeddedPkg.dec
+   MdeModulePkg/MdeModulePkg.dec
+   MdePkg/MdePkg.dec
++  OvmfPkg/OvmfPkg.dec
+   ShellPkg/ShellPkg.dec
+
+ [LibraryClasses]
+@@ -53,6 +54,7 @@
+   UefiRuntimeServicesTableLib
+
+ [FixedPcd]
++  gUefiOvmfPkgTokenSpaceGuid.PcdUninstallMemAttrProtocol
+   gArmTokenSpaceGuid.PcdUefiShellDefaultBootEnable
+   gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString
+   gEfiMdePkgTokenSpaceGuid.PcdUartDefaultBaudRate
+@@ -81,6 +83,7 @@
+   gUefiShellFileGuid
+
+ [Protocols]
++  gEfiMemoryAttributeProtocolGuid
+   gEdkiiNonDiscoverableDeviceProtocolGuid
+   gEfiBootManagerPolicyProtocolGuid
+   gEfiDevicePathProtocolGuid

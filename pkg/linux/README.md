@@ -8,8 +8,9 @@ The build is structured to support multiple kernel lines side-by-side.
 Today **6.1** (LTS), **6.18**, **cca-v15**, **snp-guest**, **mshv-host**, and
 **mshv-test** ship; additional lines can be added purely additively (see
 "Adding a new kernel version" below). The CCA line is Arm-only and ships for
-`aarch64` only. The MSHV host, MSHV test, and SNP guest lines ship for `x86_64`
-only. Each kernel is published as its own GitHub release artifact
+`aarch64` only. The MSHV host and SNP guest lines ship for `x86_64`
+only; MSHV test ships for both architectures. Each kernel is published as its
+own GitHub release artifact
 (`openvmm-test-linux-<version>.<arch>.<release>.tar.gz`) containing the
 kernel images and final config. The initrd is shared across all kernels
 and ships as its own `openvmm-test-initrd.<arch>.<release>.tar.gz`
@@ -39,7 +40,10 @@ pkg/linux/
     required.config       # Settings the Azure MSHV host needs
   mshv-test/
     x86_64.config         # Module-free mshv test root partition / x86_64
+    aarch64.config        # Module-free mshv test root partition / aarch64
     required.config       # Built-in boot, network, and share drivers
+    required.x86_64.config # x86_64 interrupt routing and console
+    required.aarch64.config # ARM64 root support and QEMU virt platform
     patches/              # Root IO-APIC interrupt lifecycle fix
 ```
 
@@ -65,8 +69,9 @@ A line can carry patches in `pkg/linux/<version>/patches/`. `patch.sh`
 applies them in filename order with no fuzz. The line's Dockerfile source
 mount must be read-write (`rw`).
 
-A line can also list settings in `pkg/linux/<version>/required.config`.
-The build fails if the resolved config does not contain each setting.
+A line can also list settings in `pkg/linux/<version>/required.config` and
+architecture-specific settings in `required.<arch>.config`. The build fails
+if the resolved config does not contain every applicable setting.
 
 The **cca-v15** line uses one exact `cca-host/v15` source commit and one union
 configuration. The same image supports QEMU and FVP L1 hosts, nested Realm
@@ -99,34 +104,47 @@ The package builder has no `pahole`, so the resolved config drops BTF
 (`DEBUG_INFO_BTF`) and the options that depend on it. The MSHV tests do not
 need BTF.
 
-The **mshv-test** line is the minimal x86_64 mshv root kernel for standalone
-Incubator and Petri tests that run mshv inside another hypervisor. It shares
+The **mshv-test** line is the module-free x86_64 and ARM64 mshv root kernel for
+standalone Incubator and Petri tests that run mshv inside another hypervisor. It shares
 the released `rolling-lts/kata/6.18.34.mshv4` source pin with `mshv-host`, but
 starts from the module-free 6.18 test config and enables `CONFIG_MSHV_ROOT`.
 EFI launch, PCIe, virtio block/network/console/vsock, and 9p are built in so
 the existing shared test initrd can boot and connect Pipette without a module
-tree.
+tree. The ARM64 configuration is seeded from the 6.18 ARM64 test config
+and enables MSHV root support with 4 KiB pages, the Hyper-V ARM64 IOMMU, and
+the QEMU virt platform's GICv3/ITS, PSCI, generic PCI host, and PL011 console.
+It targets the experimental standalone Incubator QEMU-TCG boot path; adding
+this kernel does not enable registered ARM64 nested Petri tests or supply
+the separate ARM64 EFI loader and hypervisor binaries.
 
 This source retains the working EFI-launch path and restores the two-bank
-partition-creation ABI needed by the public build-26100 hypervisor. The sole
-local patch ties root IO-APIC mappings to IRQ activation/deactivation, releasing
-them before Linux recycles interrupt vectors. Without it, stale mappings from
+partition-creation ABI needed by the public build-26100 hypervisor. The
+IO-APIC patch affects x86_64 only: it ties root IO-APIC mappings to IRQ
+activation/deactivation, releasing them before Linux recycles interrupt
+vectors. Without it, stale mappings from
 IRQ probing can prevent virtio devices from working during nested root boot.
+An additional patch guards SEV-SNP-only helpers with their callers' feature
+and architecture conditions so ARM64 builds retain `CONFIG_WERROR=y`.
 The test line does not include the separate MSI lifecycle fix or other
 development-branch changes. The installed Azure Dom0 `mshv-host` configuration
 and module packaging are unchanged.
 
-Build this kernel alone with:
+Build this kernel alone for either architecture with:
 
 ```bash
 docker build --platform linux/amd64 --target result-linux-mshv-test \
-  --output type=local,dest=out/linux-mshv-test .
+  --output type=local,dest=out/linux-mshv-test-x86_64 .
+docker build --platform linux/arm64 --target result-linux-mshv-test \
+  --output type=local,dest=out/linux-mshv-test-aarch64 .
 ```
 
-The x86_64 package target publishes it as
-`openvmm-test-linux-mshv-test.x86_64.<release>.tar.gz`. The archive contains
-`vmlinux`, `bzImage`, the resolved `config`, and `manifest.txt`; the initrd
-remains a separate shared artifact.
+The architecture-specific package targets publish it as
+`openvmm-test-linux-mshv-test.<arch>.<release>.tar.gz`. The archive contains
+`vmlinux`, `bzImage` (x86_64) or `Image` (ARM64), the resolved `config`, and
+`manifest.txt`; the initrd remains a separate shared artifact. PR builds
+upload these archives in the `x86_64` and `aarch64` workflow artifacts,
+including for draft PRs. Before merging a newly seeded config, extract and
+commit the config resolved by CI.
 
 ## Updating a kernel config
 

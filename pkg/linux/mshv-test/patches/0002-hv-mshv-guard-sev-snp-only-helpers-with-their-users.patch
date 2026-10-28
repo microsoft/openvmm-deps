@@ -1,0 +1,51 @@
+From: Copilot <223556219+Copilot@users.noreply.github.com>
+Subject: [PATCH] hv: mshv: Guard SEV-SNP-only helpers with their users
+
+mshv_gpfns_to_pages() is only called by code guarded by
+HV_SUPPORTS_SEV_SNP_GUESTS, while hv_snp_status_to_string() is only
+called from the x86_64 SEV-SNP support check. Both helpers are otherwise
+unused on ARM64, causing builds with CONFIG_WERROR=y to fail.
+
+Guard the page-lookup helper with the same feature macro as its callers,
+and extend the existing x86_64 guard to cover the status-string helper.
+Keep the ARM64 SEV-SNP support check's no-op behavior and leave x86_64
+behavior unchanged.
+---
+ drivers/hv/mshv_root_main.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/hv/mshv_root_main.c b/drivers/hv/mshv_root_main.c
+--- a/drivers/hv/mshv_root_main.c
++++ b/drivers/hv/mshv_root_main.c
+@@ -685,6 +685,7 @@ mshv_partition_region_by_gfn_get(struct mshv_partition *p, u64 gfn)
+ 	return region;
+ }
+ 
++#ifdef HV_SUPPORTS_SEV_SNP_GUESTS
+ static int mshv_gpfns_to_pages(struct mshv_partition *partition,
+ 			       const u64 *gpfns, u64 page_count,
+ 			       struct page **pages)
+@@ -721,6 +722,7 @@ static int mshv_gpfns_to_pages(struct mshv_partition *partition,
+ 	return 0;
+ }
++#endif
+ 
+ /*
+  * Check if uaddr is for mmio range. If yes, return 0 with mmio_pfn filled in
+  * else just return -errno.
+@@ -3542,7 +3544,6 @@ static int mshv_print_max_sev_snp_partitions(struct device *dev)
+ 		 snp_partition_count);
+ 	return 0;
+ }
+-#endif
+ 
+ static const char *hv_snp_status_to_string(enum hv_snp_status status)
+ {
+@@ -3573,6 +3574,7 @@ static const char *hv_snp_status_to_string(enum hv_snp_status status)
+ 		return "unknown";
+ 	}
+ }
++#endif
+ 
+ static int __init mshv_check_sev_snp_support(struct device *dev)
+ {
