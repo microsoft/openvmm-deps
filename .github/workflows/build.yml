@@ -33,7 +33,7 @@ jobs:
         architecture: [aarch64, x86_64]
     runs-on:
       - self-hosted
-      - 1ES.Pool=openvmm-gh-amd-westus3-v7
+      - 1ES.Pool=openvmm-deps-gh-amd-westus3-v7
       - 1ES.ImageOverride=ubuntu2404-amd64-prepped
       - JobId=build-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}
     permissions:
