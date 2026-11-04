@@ -38,7 +38,7 @@ out/
   virtio-villain/      initramfs.cpio.gz, tests.tsv
 ```
 
-The release pipeline packs each of these into its own tarball:
+The release workflow publishes the following tarballs:
 
 | Artifact                                              | Contents                              |
 | ----------------------------------------------------- | ------------------------------------- |
@@ -57,6 +57,7 @@ The release pipeline packs each of these into its own tarball:
 | `openvmm-test-virtio-win.<ver>.tar.gz`                | virtio-win NetKVM and viostor drivers (all OS/arch) |
 | `openvmm-test-virtio-villain.<arch>.<ver>.tar.gz`     | virtio-villain guest initramfs + `tests.tsv` |
 | `qemu-linux-static.<arch>.<ver>.tar.gz`                | static QEMU system emulators (TCG)    |
+| `symcrypt-windows.<arch>.<ver>.tar.gz`                 | native Windows SymCrypt static libraries and headers |
 
 Build release-shaped archives directly from the Docker graph:
 
