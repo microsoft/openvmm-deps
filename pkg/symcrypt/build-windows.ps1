@@ -56,12 +56,12 @@ git -C $src checkout --detach FETCH_HEAD
 $symcryptArchitecture = @{ x64 = 'AMD64'; arm64 = 'ARM64' }[$Architecture]
 # Ninja uses the installed SDK from the native developer shell instead of
 # upstream's Visual Studio generator SDK selection (10.0.18362).
-# Use /MT and embed debug info so consumers need no CRT DLL or separate library PDBs.
+# Use /MD for the DLL CRT and embed debug info so consumers need no separate library PDBs.
 cmake -S $src -B $build -G Ninja `
     "-DSYMCRYPT_TARGET_ARCH=$symcryptArchitecture" `
     "-DCMAKE_C_COMPILER=cl.exe" "-DCMAKE_CXX_COMPILER=cl.exe" `
     -DCMAKE_BUILD_TYPE=RelWithDebInfo `
-    -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded `
+    -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL `
     -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded `
     -DSYMCRYPT_USE_ASM=ON -DSYMCRYPT_FIPS_BUILD=OFF `
     -DSYMCRYPT_BUILD_MODULES=OFF -DSYMCRYPT_UNIT_TESTS=ON
@@ -85,7 +85,7 @@ try {
         "commit=$($pin.commitHash)"
         "architecture=$Architecture"
         'configuration=RelWithDebInfo'
-        'runtime=MT'
+        'runtime=MD'
         'fips=off'
     ) | Set-Content "$package/manifest" -Encoding ascii
 
