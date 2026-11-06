@@ -44,7 +44,7 @@ pkg/linux/
     required.config       # Built-in boot, network, and share drivers
     required.x86_64.config # x86_64 interrupt routing and console
     required.aarch64.config # ARM64 root support and QEMU virt platform
-    patches/              # Root IO-APIC interrupt lifecycle fix
+    patches/              # Root interrupt lifecycle and build fixes
 ```
 
 The version selection is driven by `$LINUX_VERSION`, which is exported by
@@ -125,9 +125,14 @@ vectors. Without it, stale mappings from
 IRQ probing can prevent virtio devices from working during nested root boot.
 An additional patch guards SEV-SNP-only helpers with their callers' feature
 and architecture conditions so ARM64 builds retain `CONFIG_WERROR=y`.
-The test line does not include the separate MSI lifecycle fix or other
-development-branch changes. The installed Azure Dom0 `mshv-host` configuration
-and module packaging are unchanged.
+The root MSI lifecycle patch likewise maps during IRQ activation, releases
+mappings before vector reuse, and leaves message composition to encode the
+cached entry. Without it, virtio-vsock TX completion interrupts can be lost,
+hanging native nested Petri tests even after the child has passed and exited.
+It also removes allocation and freeing from composition under the IRQ
+descriptor's raw lock. Other development-branch changes are not included.
+The installed Azure Dom0 `mshv-host` configuration and module packaging are
+unchanged.
 
 Build this kernel alone for either architecture with:
 
